@@ -3,17 +3,19 @@ import mongoose from "mongoose";
 
 //Schema of the users input
 const itemSchema = mongoose.Schema({
-    username: {
+    name: {
         type: String,
         required: true
     },
     email: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     phone: {
-        type: Number,
-        required: true
+        type: String,
+        required: true,
+        unique: true
     },
     password: {
         type: String,
@@ -25,6 +27,6 @@ const itemSchema = mongoose.Schema({
     }
 })
 
-const itemModel = mongoose.model('Items', itemSchema)
+const itemModel = mongoose.model('user', itemSchema)
 
 export default itemModel
