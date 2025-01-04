@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 
 //Schema of the users input
 const itemSchema = mongoose.Schema({
-    name: {
+    username: {
         type: String,
         required: true
     },
@@ -21,6 +21,7 @@ const itemSchema = mongoose.Schema({
     },
     referalCode : {
       type : String,
+      required : false
     }
 })
 

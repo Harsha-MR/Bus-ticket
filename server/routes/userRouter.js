@@ -1,6 +1,6 @@
 import express from 'express'
 import itemModel from '../models/userModel.js';
-
+import validateUser from '../middlewares/userValidation.js';
 const router = express.Router();
 
 // router.get('/', async (req, res) => {
@@ -16,11 +16,11 @@ const router = express.Router();
 // })
 
 
-router.post('/login', async (req, res) => {
-    const { name, email, phone, password, referalCode } = req.body
+router.post('/login', validateUser, async (req, res) => {
+    const { username, email, phone, password, referalCode } = req.body
     try {
         const item = new itemModel({
-            name, email, phone, password, referalCode
+            username, email, phone, password, referalCode
         })
         await item.save()
         if (!item)
@@ -70,3 +70,5 @@ router.post('/login', async (req, res) => {
 //         res.status(500).json({ message: 'server error' })
 //     }
 // })
+
+export default router;
