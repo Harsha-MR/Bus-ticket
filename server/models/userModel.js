@@ -21,6 +21,10 @@ const itemSchema = mongoose.Schema({
         type: String,
         required : true,
     },
+    isAdmin: {
+        type: Boolean,
+        default:false,
+    }, // Default to non-admin users
     referalCode : {
       type : String,
       required : false

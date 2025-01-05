@@ -8,7 +8,7 @@ const busSchema = new mongoose.Schema(
         required: true 
     }, // e.g., "Volvo AC"
 
-    number: 
+    reg_num: 
     { 
         type: String,
         required: true, 

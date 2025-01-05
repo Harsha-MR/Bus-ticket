@@ -10,7 +10,7 @@ export const registerUser = async (req, res) => {
   try {
     // Validate request data
     const validatedData = registerSchema.parse(req.body);
-    const { name, email,phone,password } = validatedData;
+    const { name, email,phone,password,isAdmin } = validatedData;
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -22,7 +22,7 @@ export const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Save user to the database
-    const newUser = new User({ name, email,phone, password: hashedPassword });
+    const newUser = new User({ name, email,phone, password: hashedPassword,isAdmin });
     await newUser.save();
 
     res.status(201).json({ message: "User registered successfully" });
