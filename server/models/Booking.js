@@ -5,7 +5,7 @@ const bookingSchema = new mongoose.Schema(
     userId: 
     { 
         type: mongoose.Schema.Types.ObjectId, 
-        ref: "User", 
+        ref: "userModel", 
         required: true 
     }, // User who made the booking
 
