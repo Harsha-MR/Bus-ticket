@@ -142,6 +142,84 @@ export const deleteBus = async (req, res) => {
 //seats are locked for the specified segment but remain available for other segments.
 
 
+// export const bookSeats = async (req, res) => {
+//   try {
+//     const { busId, from, to, seats } = req.body;
+
+//     // Validate input
+//     if (!busId || !from || !to || !seats || !Array.isArray(seats)) {
+//       return res.status(400).json({ message: "Invalid input provided." });
+//     }
+
+//     // Find the bus
+//     const bus = await Bus.findById(busId);
+//     if (!bus) {
+//       return res.status(404).json({ message: "Bus not found." });
+//     }
+
+//     // Check that the route includes both "from" and "to"
+//     const fromIndex = bus.route.indexOf(from);
+//     const toIndex = bus.route.indexOf(to);
+//     if (fromIndex === -1 || toIndex === -1 || fromIndex >= toIndex) {
+//       return res.status(400).json({ message: "Invalid route specified." });
+//     }
+
+//     // Check seat availability for all segments between "from" and "to"
+//     for (let i = fromIndex; i < toIndex; i++) {
+//       const segment = bus.segments.find(
+//         (seg) => seg.from === bus.route[i] && seg.to === bus.route[i + 1]
+//       );
+
+//       if (!segment) {
+//         return res.status(400).json({
+//           message: `Segment from ${bus.route[i]} to ${bus.route[i + 1]} not found.`,
+//         });
+//       }
+
+//       const unavailableSeats = seats.filter(
+//         (seatNumber) =>
+//           segment.seats.find((seat) => seat.number === seatNumber)?.isBooked
+//       );
+
+//       if (unavailableSeats.length > 0) {
+//         return res.status(400).json({
+//           message: `Seats ${unavailableSeats.join(
+//             ", "
+//           )} are already booked on segment from ${segment.from} to ${segment.to}.`,
+//         });
+//       }
+//     }
+
+//     // Book the seats
+//     for (let i = fromIndex; i < toIndex; i++) {
+//       const segment = bus.segments.find(
+//         (seg) => seg.from === bus.route[i] && seg.to === bus.route[i + 1]
+//       );
+
+//       segment.seats.forEach((seat) => {
+//         if (seats.includes(seat.number)) {
+//           seat.isBooked = true;
+//         }
+//       });
+//     }
+
+//     // Decrement available seats
+//     bus.availableSeats -= seats.length;
+
+//     // Save the updated bus
+//     await bus.save();
+
+//     res.status(200).json({
+//       message: "Seats booked successfully.",
+//       bookedSeats: seats,
+//       from,
+//       to,
+//     });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
+
 export const bookSeats = async (req, res) => {
   try {
     const { busId, from, to, seats } = req.body;
@@ -183,14 +261,12 @@ export const bookSeats = async (req, res) => {
 
       if (unavailableSeats.length > 0) {
         return res.status(400).json({
-          message: `Seats ${unavailableSeats.join(
-            ", "
-          )} are already booked on segment from ${segment.from} to ${segment.to}.`,
+          message: `Seats ${unavailableSeats.join(", ")} are already booked on segment from ${segment.from} to ${segment.to}.`,
         });
       }
     }
 
-    // Book the seats
+    // Book the seats for all segments between "from" and "to"
     for (let i = fromIndex; i < toIndex; i++) {
       const segment = bus.segments.find(
         (seg) => seg.from === bus.route[i] && seg.to === bus.route[i + 1]
@@ -203,7 +279,7 @@ export const bookSeats = async (req, res) => {
       });
     }
 
-    // Decrement available seats
+    // Decrement available seats only once
     bus.availableSeats -= seats.length;
 
     // Save the updated bus
@@ -219,3 +295,4 @@ export const bookSeats = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
