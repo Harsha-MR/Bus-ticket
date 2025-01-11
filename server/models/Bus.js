@@ -21,6 +21,8 @@ const busSchema = new mongoose.Schema(
     route: { type: [String], required: true }, // Array of stop names in order
     segments: [segmentSchema], // Details about each route segment
     seats: { type: Number, required: true }, // Duplicate with `totalSeats`, but included for compatibility
+    startTime: { type: Date, required: true }, // Arrival time of the bus
+    endTime: { type: Date, required: true }, // Departure time of the bus
   },
   { timestamps: true }
 );
