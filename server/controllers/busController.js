@@ -6,9 +6,9 @@ import Route from "../models/Route.js";
 
 export const getBusesForRoute = async (req, res) => {
   try {
-    const { source, destination } = req.query;
-    // console.log(source);
-    // console.log(destination);
+    const { source, destination } = req.body;
+    console.log(source);
+    console.log(destination);
     
     if (!source || !destination) {
       return res.status(400).json({ message: "Source and destination are required." });
@@ -16,12 +16,16 @@ export const getBusesForRoute = async (req, res) => {
     // Find the route matching source and destination
     const route = await Route.findOne({ source, destination });
     if (!route) {
+      console.log(route);
+      
       return res.status(404).json({ message: "No route found" });
     }
 
     // Find buses for the route
     const buses = await Bus.find({ routeId: route._id });
     res.status(200).json(buses);
+    console.log(buses);
+    
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -40,21 +44,19 @@ export const addBus = async (req, res) => {
       routeId,
       route,
       segments,
-      seats,
       startTime,
       endTime,
     } = req.body;
-
+  
     // Validate input
     if (
       !name ||
       !reg_num ||
       !totalSeats ||
-      !availableSeats ||
+      !availableSeats||
       !routeId ||
       !route ||
       !segments ||
-      !seats ||
       !startTime ||
       !endTime
     ) {
@@ -94,7 +96,7 @@ export const addBus = async (req, res) => {
       routeId,
       route,
       segments,
-      seats,
+      seats: totalSeats,
       startTime: start,
       endTime: end,
     });
@@ -111,7 +113,7 @@ export const addBus = async (req, res) => {
 // Get all buses
 export const getBuses = async (req, res) => {
   try {
-    const buses = await Bus.find().populate("routeId");
+    const buses = await Bookings.find().populate("routeId");
     res.status(200).json(buses);
   } catch (error) {
     res.status(500).json({ message: error.message });
