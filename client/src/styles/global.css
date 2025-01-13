@@ -1,0 +1,62 @@
+/* src/styles/global.css */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+}
+
+header {
+  background-color: #007BFF;
+  color: white;
+  padding: 10px 0;
+  text-align: center;
+}
+
+footer {
+  background-color: #007BFF;
+  color: white;
+  padding: 10px 0;
+  text-align: center;
+}
+
+button {
+  padding: 10px 20px;
+  margin: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* src/styles/global.css */
+.seat-selection {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.seat-row {
+  display: flex;
+  justify-content: space-around;
+}
+
+.seat {
+  padding: 10px;
+  font-size: 18px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.seat.selected {
+  background-color: #007BFF;
+  color: white;
+}
+
+button {
+  padding: 10px 20px;
+  margin-top: 20px;
+  font-size: 16px;
+  cursor: pointer;
+}

@@ -12,5 +12,6 @@ Delete => /api/buses/:id    //to delete the buses
 Post => /api/bookings/:id/book-seats   //for booking
 post => /api/bookings/cancel        //for canceling of seats 
 post => /api/buses/addRoute    //to adding routes
+
 ## Users access routes
 Get => /api/bookings/history    //to check the history of bookings

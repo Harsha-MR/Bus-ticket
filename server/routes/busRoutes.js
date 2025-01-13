@@ -11,6 +11,7 @@ const router = express.Router();
 // Fetch buses for a route
 router.get("/",getBusesForRoute);
 
+
 // Routes for managing buses
 router.post("/", authMiddleware, adminMiddleware, addBus); // Add a new bus
 router.get("/", authMiddleware, getBuses); // Get all buses

@@ -19,7 +19,7 @@ const seedDatabase = async () => {
     // Add sample routes
     const route1 = new Route({
       source: "City A",
-      destination: "City B",
+      destination: "City D",
       stops: ["Stop 1", "Stop 2"],
       duration: "6h 30m",
       distance: "300km",

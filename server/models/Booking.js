@@ -7,10 +7,11 @@ const bookingSchema = new mongoose.Schema(
       from: { type: String, required: true },
       to: { type: String, required: true },
       seatNumbers: [{ type: Number, required: true }],
-      journeyStartTime: { type: Date, required: true },
-      journeyEndTime: { type: Date, required: true },
+      startTime: { type: Date, required: false},
+      endTime: { type: Date, required: false },
       isCanceled: { type: Boolean, default: false },
       cancellationTime: { type: Date },
+      reminderSent: { type: Boolean, default: false }, // Track if the reminder is sent
     },
     { timestamps: true }
   );
