@@ -4,8 +4,10 @@
 import Booking from "../models/Booking.js";
 import Bus from "../models/Bus.js";
 import Route from "../models/Route.js"
-import { sendEmail } from "../services/emailservice.js";
+import { sendTicketEmail } from "../services/emailservice.js";
 import User from "../models/userModel.js"
+import { generateTicketPDF } from "../services/pdfgenerator.js";
+
 
 // export const createBooking = async (req, res) => {
 //   try {
@@ -59,11 +61,120 @@ export const getBookingHistory = async (req, res) => {
   };
   
 //for booking seats
+// export const bookSeats = async (req, res) => {
+//   try {
+//     const { busId, from, to, seats } = req.body;
+//     const userId = req.user.id;
+//     const userEmail = req.user.email;
+
+//     // Validate input
+//     if (!busId || !from || !to || !seats || !Array.isArray(seats)) {
+//       return res.status(400).json({ message: "Invalid input provided." });
+//     }
+
+//     // Find the bus
+//     const bus = await Bus.findById(busId);
+//     if (!bus) {
+//       return res.status(404).json({ message: "Bus not found." });
+//     }
+
+//     // Check that the route includes both "from" and "to"
+//     const fromIndex = bus.route.indexOf(from);
+//     const toIndex = bus.route.indexOf(to);
+//     if (fromIndex === -1 || toIndex === -1 || fromIndex >= toIndex) {
+//       return res.status(400).json({ message: "Invalid route specified." });
+//     }
+
+//     // Check seat availability for all segments between "from" and "to"
+//     for (let i = fromIndex; i < toIndex; i++) {
+//       const segment = bus.segments.find(
+//         (seg) => seg.from === bus.route[i] && seg.to === bus.route[i + 1]
+//       );
+
+//       if (!segment) {
+//         return res.status(400).json({
+//           message: `Segment from ${bus.route[i]} to ${bus.route[i + 1]} not found.`,
+//         });
+//       }
+
+//       const unavailableSeats = seats.filter(
+//         (seatNumber) =>
+//           segment.seats.find((seat) => seat.number === seatNumber)?.isBooked
+//       );
+
+//       if (unavailableSeats.length > 0) {
+//         return res.status(400).json({
+//           message: `Seats ${unavailableSeats.join(", ")} are already booked on segment from ${segment.from} to ${segment.to}.`,
+//         });
+//       }
+//     }
+
+//     // Book the seats for all segments between "from" and "to"
+//     for (let i = fromIndex; i < toIndex; i++) {
+//       const segment = bus.segments.find(
+//         (seg) => seg.from === bus.route[i] && seg.to === bus.route[i + 1]
+//       );
+
+//       segment.seats.forEach((seat) => {
+//         if (seats.includes(seat.number)) {
+//           seat.isBooked = true;
+//         }
+//       });
+
+//       // Mark the segment as modified so Mongoose saves it correctly
+//       bus.markModified(`segments.${i}.seats`);
+//     }
+
+//     // Decrement available seats only once
+//     bus.availableSeats -= seats.length;
+
+//     // Save the updated bus
+//     await bus.save();
+
+//     // Create a new booking record
+//     const booking = new Booking({
+//       userId,
+//       busId,
+//       from,
+//       to,
+//       seatNumbers: seats,
+//       journeyStartTime: new Date(), // Add the journey's start time
+//       journeyEndTime: new Date(), // Add the journey's end time (if applicable)
+//     });
+
+//     await booking.save(); // Save the booking to the database
+
+//     // Send booking confirmation email
+//     const emailSubject = "Booking Confirmation";
+//     const emailText = `Your seats ${seats.join(", ")} from ${from} to ${to} have been successfully booked.`;
+//     const emailHtml = `
+//       <h2>Booking Confirmation</h2>
+//       <p>Your seats <strong>${seats.join(", ")}</strong> from <strong>${from}</strong> to <strong>${to}</strong> have been successfully booked.</p>
+//     `;
+
+//     await sendEmail(userEmail, emailSubject, emailText, emailHtml);
+
+//     res.status(200).json({
+//       message: `Seats booked successfully. Confirmation email sent to ${userEmail}.`,
+//       bookedSeats: seats,
+//       from,
+//       to,
+//       bookingId: booking._id, // Return the booking ID
+//     });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
+
+
+//for book seats
 export const bookSeats = async (req, res) => {
   try {
     const { busId, from, to, seats } = req.body;
     const userId = req.user.id;
     const userEmail = req.user.email;
+    const userName = req.user.name;
+
 
     // Validate input
     if (!busId || !from || !to || !seats || !Array.isArray(seats)) {
@@ -102,7 +213,9 @@ export const bookSeats = async (req, res) => {
 
       if (unavailableSeats.length > 0) {
         return res.status(400).json({
-          message: `Seats ${unavailableSeats.join(", ")} are already booked on segment from ${segment.from} to ${segment.to}.`,
+          message: `Seats ${unavailableSeats.join(
+            ", "
+          )} are already booked on segment from ${segment.from} to ${segment.to}.`,
         });
       }
     }
@@ -136,101 +249,60 @@ export const bookSeats = async (req, res) => {
       from,
       to,
       seatNumbers: seats,
-      journeyStartTime: new Date(), // Add the journey's start time
-      journeyEndTime: new Date(), // Add the journey's end time (if applicable)
+      journeyStartTime: new Date(bus.startTime), // Add the journey's start time
+      journeyEndTime: new Date(bus.endTime), // Add the journey's end time
     });
 
     await booking.save(); // Save the booking to the database
 
-    // Send booking confirmation email
+    // Generate ticket PDF
+    console.log(req.user);
+    console.log(req.user.name)
+    
+    const filePath = generateTicketPDF({
+      userName: req.user.name,
+      userEmail: req.user.email,
+      busName: bus.name,
+      busRegNumber: bus.reg_num,
+      from,
+      to,
+      seatNumbers: seats,
+      journeyStartTime: bus.startTime,
+      journeyEndTime: bus.endTime,
+      ticketId: booking._id,
+    });
+
+    // Send booking confirmation email with ticket attachment
     const emailSubject = "Booking Confirmation";
-    const emailText = `Your seats ${seats.join(", ")} from ${from} to ${to} have been successfully booked.`;
+    const emailText = `Your seats ${seats.join(
+      ", "
+    )} from ${from} to ${to} have been successfully booked.`;
     const emailHtml = `
       <h2>Booking Confirmation</h2>
-      <p>Your seats <strong>${seats.join(", ")}</strong> from <strong>${from}</strong> to <strong>${to}</strong> have been successfully booked.</p>
+      <p>Your seats <strong>${seats.join(
+        ", "
+      )}</strong> from <strong>${from}</strong> to <strong>${to}</strong> have been successfully booked.</p>
+      <p>Please find your ticket attached as a PDF.</p>
     `;
+    const b_id=booking._id;
+    await sendTicketEmail(userEmail, emailSubject, emailText, emailHtml, filePath,b_id);
 
-    await sendEmail(userEmail, emailSubject, emailText, emailHtml);
-
+    // Send response to client
     res.status(200).json({
       message: `Seats booked successfully. Confirmation email sent to ${userEmail}.`,
       bookedSeats: seats,
       from,
       to,
-      bookingId: booking._id, // Return the booking ID
+      bookingId: booking._id,
+      ticketPDF: filePath, // Include the ticket PDF path
     });
+    
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
 
-
-
-  // export const cancelBooking = async (req, res) => {
-  //   try {
-  //     const { bookingId } = req.body;
-  
-  //     // Validate input
-  //     if (!bookingId) {
-  //       return res.status(400).json({ message: "Booking ID is required" });
-  //     }
-  
-  //     // Find the booking
-  //     const booking = await Booking.findById(bookingId);
-  //     if (!booking) {
-  //       return res.status(404).json({ message: "Booking not found" });
-  //     }
-  
-  //     // Find the bus associated with the booking
-  //     const bus = await Bus.findById(booking.busId);
-  //     if (!bus) {
-  //       return res.status(404).json({ message: "Bus not found" });
-  //     }
-  
-  //     // Calculate the difference between the current time and bus departure time
-  //     const currentTime = new Date();
-  //     const startTime = new Date(bus.startTime);
-  //     const timeDifference = (startTime - currentTime) / 1000 / 60 / 60; // Convert to hours
-  
-  //     // Check if the cancellation is allowed (must be at least 24 hours before departure)
-  //     if (timeDifference < 24) {
-  //       return res
-  //         .status(400)
-  //         .json({ message: "Cancellation allowed only 24 hours before the journey" });
-  //     }
-  
-  //     // Update the seat status for the relevant bus
-  //     const { from, to, seatNumbers } = booking;
-  
-  //     // Update seat status in all relevant segments and adjust availableSeats
-  //     bus.segments.forEach((segment) => {
-  //       if (segment.from === from || segment.to === to) {
-  //         seatNumbers.forEach((seatNumber) => {
-  //           const seat = segment.seats.find((s) => s.number === seatNumber);
-  //           if (seat && seat.isBooked) {
-  //             seat.isBooked = false;
-  //             bus.availableSeats += 1; // Increment available seats count
-  //           }
-  //         });
-  //       }
-  //     });
-  
-  //     await bus.save();
-  
-  //     // Mark the booking as canceled
-  //     booking.isCanceled = true;
-  //     booking.cancellationTime = new Date(); // Log the cancellation time
-  //     await booking.save();
-  
-  //     res.status(200).json({
-  //       message: "Booking canceled successfully",
-  //       availableSeats: bus.availableSeats,
-  //     });
-  //   } catch (error) {
-  //     res.status(500).json({ message: error.message });
-  //   }
-  // };
 
   //cancel
   export const cancelBooking = async (req, res) => {

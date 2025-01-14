@@ -5,7 +5,6 @@ import loginSchema from "../validation/loginValidation.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv"
 dotenv.config();
-
 export const registerUser = async (req, res) => {
   try {
     // Validate request data
@@ -42,9 +41,9 @@ export const loginUser = async (req, res) => {
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
-
+    
     // Generate JWT token
-    const token = jwt.sign({ id: user._id , email: user.email }, process.env.JWT_SECRET, { expiresIn: "22h" });
+    const token = jwt.sign({ id: user._id , email: user.email,name:user.name}, process.env.JWT_SECRET, { expiresIn: "22h" });
 
     res.status(200).json({ token, user: { id: user._id, name: user.name, email: user.email } });
   } catch (error) {

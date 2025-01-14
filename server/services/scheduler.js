@@ -6,8 +6,8 @@ import nodemailer from "nodemailer";
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "EMAIL_USER",
-    pass: "EMAIL_PASS",
+    user: "process.env.EMAIL_USER",
+    pass: "process.env.EMAIL_PASS",
   },
 });
 
@@ -40,7 +40,7 @@ cron.schedule("*/30 * * * *", async () => {
 
       // Send email
       await transporter.sendMail({
-        from: "EMAIL_USER",
+        from: "process.env.EMAIL_USER",
         to: booking.userEmail,
         subject: "Journey Reminder",
         html: emailBody,
