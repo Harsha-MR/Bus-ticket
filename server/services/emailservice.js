@@ -1,26 +1,61 @@
+// import nodemailer from "nodemailer";
+
+// const transporter = nodemailer.createTransport({
+//   service: "gmail", // Use your email service provider
+//   auth: {
+//     user: process.env.EMAIL_USER, // Your email address
+//     pass: process.env.EMAIL_PASS, // Your email password or app-specific password
+//   },
+// });
+
+// export const sendEmail = async (to, subject, text, html) => {
+//   try {
+//     const mailOptions = {
+//       from: process.env.EMAIL_USER, // Sender address
+//       to, // Recipient address
+//       subject,
+//       text, // Plain text body
+//       html, // HTML body (optional)
+//     };
+
+//     await transporter.sendMail(mailOptions);
+//     console.log(`Email sent to ${to}`);
+//   } catch (error) {
+//     console.error("Error sending email:", error);
+//   }
+// };
+
 import nodemailer from "nodemailer";
 
-const transporter = nodemailer.createTransport({
-  service: "gmail", // Use your email service provider
+// Configure the transporter
+export const transporter = nodemailer.createTransport({
+  service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER, // Your email address
-    pass: process.env.EMAIL_PASS, // Your email password or app-specific password
+    user: process.env.EMAIL_USER, // Access environment variable directly (remove quotes)
+    pass: process.env.EMAIL_PASS,
   },
 });
 
-export const sendEmail = async (to, subject, text, html) => {
-  try {
-    const mailOptions = {
-      from: process.env.EMAIL_USER, // Sender address
-      to, // Recipient address
-      subject,
-      text, // Plain text body
-      html, // HTML body (optional)
-    };
+export const sendTicketEmail = async (userEmail, emailSubject, emailText, emailHtml, filePath,b_id) => {
 
-    await transporter.sendMail(mailOptions);
-    console.log(`Email sent to ${to}`);
+  try {
+    // Use the req.user.email for the recipient's address
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER, // Use environment variable directly
+      to: userEmail, 
+      subject: emailSubject,
+      text: emailText,
+      html:emailHtml,
+      attachments: [
+        {
+          filename: `ticket-${b_id}.pdf`,
+          path: filePath,
+        },
+      ],
+    });
+    console.log("Email sent successfully!");
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error("Error sending email:", error.message);
   }
 };
+
