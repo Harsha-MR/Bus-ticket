@@ -256,8 +256,6 @@ export const bookSeats = async (req, res) => {
     await booking.save(); // Save the booking to the database
 
     // Generate ticket PDF
-    console.log(req.user);
-    console.log(req.user.name)
     
     const filePath = generateTicketPDF({
       userName: req.user.name,

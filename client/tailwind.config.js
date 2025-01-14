@@ -1,12 +1,16 @@
-// tailwind.config.js
-
-module.exports = {
+/** @type {import('tailwindcss').Config} */
+export default {
   content: [
-    './index.htnml',
-    './src/**/*.{js,jsx,ts,tsx}', // Make sure this path is correct
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: '#d84e55',
+        secondary: '#457b9d',
+      },
+    },
   },
   plugins: [],
-};
+}
