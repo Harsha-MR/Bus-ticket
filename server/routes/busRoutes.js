@@ -6,7 +6,7 @@ import { getBusesForRoute } from "../controllers/busController.js";
 import { addBus, getBuses, updateBus, deleteBus,addRoute } from "../controllers/busController.js";
 import { authMiddleware, adminMiddleware } from "../middlewares/adminMiddleware.js";
 
-const router = express.Router();
+const   router = express.Router();
 
 // Fetch buses for a route
 router.get("/",getBusesForRoute);
