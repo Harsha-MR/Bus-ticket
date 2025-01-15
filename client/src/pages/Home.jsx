@@ -1,54 +1,151 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import DatePicker from 'react-datepicker';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { FaExchangeAlt, FaCalendarAlt, FaBus } from 'react-icons/fa';
+import { FaBus, FaCalendarAlt, FaExchangeAlt } from "react-icons/fa"; // Importing icons
 
 function Home() {
   const navigate = useNavigate();
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
   const [date, setDate] = useState(new Date());
+  const [fromDropdown, setFromDropdown] = useState([]);
+  const [toDropdown, setToDropdown] = useState([]);
+
+  const southIndianCities = [
+    "Chennai",
+    "Bangalore",
+    "Hyderabad",
+    "Coimbatore",
+    "Kochi",
+    "Madurai",
+    "Mysore",
+    "Visakhapatnam",
+    "Vijayawada",
+    "Thiruvananthapuram",
+  ];
+
+  // Generate all possible direct routes
+  const possibleRoutes = southIndianCities.flatMap((source) =>
+    southIndianCities.filter((destination) => source !== destination).map((destination) => ({
+      from: source,
+      to: destination,
+    }))
+  );
 
   const handleSearch = (e) => {
     e.preventDefault();
-    navigate('/buses', { state: { from, to, date } });
+    const isValidRoute = possibleRoutes.some(
+      (route) =>
+        route.from.toLowerCase() === from.toLowerCase() &&
+        route.to.toLowerCase() === to.toLowerCase()
+    );
+
+    if (isValidRoute) {
+      navigate("/buses", { state: { from, to, date } });
+    } else {
+      alert("No direct bus route exists between the selected cities.");
+    }
+  };
+
+  const handleFromInput = (e) => {
+    const input = e.target.value;
+    setFrom(input);
+    if (input.length > 0) {
+      const filteredCities = southIndianCities.filter((city) =>
+        city.toLowerCase().includes(input.toLowerCase())
+      );
+      setFromDropdown(filteredCities);
+    } else {
+      setFromDropdown([]);
+    }
+  };
+
+  const handleToInput = (e) => {
+    const input = e.target.value;
+    setTo(input);
+    if (input.length > 0) {
+      const filteredCities = southIndianCities.filter((city) =>
+        city.toLowerCase().includes(input.toLowerCase())
+      );
+      setToDropdown(filteredCities);
+    } else {
+      setToDropdown([]);
+    }
+  };
+
+  const handleFromSelect = (city) => {
+    setFrom(city);
+    setFromDropdown([]);
+  };
+
+  const handleToSelect = (city) => {
+    setTo(city);
+    setToDropdown([]);
   };
 
   return (
     <div className="min-h-[calc(100vh-64px)]">
       <div className="bg-primary text-white py-16">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold mb-8 text-center">India's No. 1 Online Bus Ticket Booking Site</h1>
+          <h1 className="text-4xl font-bold mb-8 text-center">
+            India's No. 1 Online Bus Ticket Booking Site
+          </h1>
           <div className="max-w-3xl mx-auto bg-white rounded-lg p-6">
             <form onSubmit={handleSearch} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
+                <div className="relative">
                   <label className="block text-gray-700 mb-2">From</label>
                   <input
                     type="text"
                     value={from}
-                    onChange={(e) => setFrom(e.target.value)}
+                    onChange={handleFromInput}
                     className="text-black w-full p-2 border rounded"
                     placeholder="Enter source city"
                   />
+                  {fromDropdown.length > 0 && (
+                    <ul className="absolute left-0 right-0 bg-white border border-gray-200 rounded mt-1 max-h-40 overflow-y-auto z-10">
+                      {fromDropdown.map((city, index) => (
+                        <li
+                          key={index}
+                          onClick={() => handleFromSelect(city)}
+                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-gray-700"
+                        >
+                          {city}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
-                <div>
+                <div className="relative">
                   <label className="block text-gray-700 mb-2">To</label>
                   <input
                     type="text"
                     value={to}
-                    onChange={(e) => setTo(e.target.value)}
-                    className="text-black w-full p-2 border rounded "
+                    onChange={handleToInput}
+                    className="text-black w-full p-2 border rounded"
                     placeholder="Enter destination city"
                   />
+                  {toDropdown.length > 0 && (
+                    <ul className="absolute left-0 right-0 bg-white border border-gray-200 rounded mt-1 max-h-40 overflow-y-auto z-10">
+                      {toDropdown.map((city, index) => (
+                        <li
+                          key={index}
+                          onClick={() => handleToSelect(city)}
+                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-gray-700"
+                        >
+                          {city}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
                 <div>
                   <label className="block text-gray-700 mb-2">Date</label>
                   <DatePicker
                     selected={date}
                     onChange={(date) => setDate(date)}
-                    className=" text-black w-full p-2 border rounded"
+                    className="text-black w-full p-2 border rounded"
                     minDate={new Date()}
                   />
                 </div>
@@ -91,7 +188,6 @@ function Home() {
           </div>
         </div>
       </div>
-      
     </div>
   );
 }
