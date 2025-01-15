@@ -93,7 +93,7 @@ const BusList = () => {
             <button className="hover:text-gray-800">Reviews</button>
             <button className="hover:text-gray-800">Booking policies</button>
           </div>
-          <button onClick={() => (window.location.href = '/view-seats')} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+          <button onClick={() => (window.location.href = '/bus/:id')} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
             VIEW SEATS
           </button>
         </div>
