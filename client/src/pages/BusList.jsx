@@ -77,7 +77,7 @@ function BusList() {
                 <span className="text-yellow-500">★</span>
                 <span className="ml-1">{bus.rating}</span>
               </div>
-              <button className="bg-primary text-white px-6 py-2 rounded hover:bg-red-700">
+              <button onClick={() => (window.location.href = '/view-seats')}className="bg-primary text-white px-6 py-2 rounded hover:bg-red-700">
                 View Seats
               </button>
             </div>

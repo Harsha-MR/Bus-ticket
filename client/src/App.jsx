@@ -6,7 +6,8 @@ import BusList from './pages/BusList';
 import BusDetails from './pages/BusDetails';
 import Booking from './pages/Booking';
 import Login from './pages/Login';
-
+import ViewSeats from './pages/ViewSeats';
+import PaymentPage from './pages/PaymentPage';
 function App() {
   return (
     <Router>
@@ -19,6 +20,9 @@ function App() {
             <Route path="/bus/:id" element={<BusDetails />} />
             <Route path="/booking/:id" element={<Booking />} />
             <Route path="/login" element={<Login />} />
+            {/* <Route path="/view-seats" element={<ViewSeats />} /> */}
+            <Route path="/view-seats" element={<BusDetails />} />
+            <Route path="/payment" element={<PaymentPage />} />
           </Routes>
         </main>
         <Footer />
