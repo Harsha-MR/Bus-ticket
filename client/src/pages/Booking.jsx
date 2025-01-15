@@ -106,10 +106,11 @@ function Booking() {
           </div>
 
           <button
+            onClick={() => (window.location.href = '/payment')}
             type="submit"
             className="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-red-700"
           >
-            Confirm Booking
+            Proceed to Payment
           </button>
         </form>
       </div>
