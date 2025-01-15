@@ -1,91 +1,105 @@
-import { useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import React from 'react';
 
-function BusList() {
-  const location = useLocation();
-  const { from, to, date } = location.state || {};
-  
-  // Mock bus data
-  const [buses] = useState([
-    {
-      id: 1,
-      operator: "Express Travels",
-      departure: "10:00 PM",
-      arrival: "06:00 AM",
-      duration: "8h",
-      price: 899,
-      type: "AC Sleeper",
-      seats: 36,
-      rating: 4.5,
-    },
-    {
-      id: 2,
-      operator: "Royal Buses",
-      departure: "11:30 PM",
-      arrival: "07:30 AM",
-      duration: "8h",
-      price: 999,
-      type: "AC Sleeper",
-      seats: 28,
-      rating: 4.3,
-    },
-  ]);
-
+const BusList = () => {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="bg-gray-100 p-4 rounded-lg mb-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-xl font-bold">{from} → {to}</h2>
-            <p className="text-gray-600">{date?.toLocaleDateString()}</p>
+    <div className="max-w-6xl mx-auto p-4">
+      {/* Header Section */}
+      <div className="flex items-center justify-between mb-4 text-gray-600">
+        <div>
+          <span className="font-bold text-gray-800">70 Buses</span>
+          <span className="ml-1">found</span>
+        </div>
+        
+        {/* <div className="flex items-center gap-6">
+          <span className="font-medium">SORT BY:</span>
+          <button className="hover:text-gray-800">Departure</button>
+          <button className="hover:text-gray-800">Duration</button>
+          <button className="hover:text-gray-800">Arrival</button>
+          <button className="hover:text-gray-800">Ratings</button>
+          <button className="hover:text-gray-800">Fare</button>
+          <button className="hover:text-gray-800">Seats Available</button>
+        </div> */}
+      </div>
+
+      {/* Bus Card */}
+      <div className="border rounded-lg bg-white shadow-sm mb-4">
+        <div className="p-4">
+          <div className="grid grid-cols-12 gap-4">
+            {/* Bus Info */}
+            <div className="col-span-3">
+              <h3 className="text-lg font-semibold">Sugama Tourist</h3>
+              <p className="text-sm text-gray-600">NON A/C Sleeper (2+1)</p>
+              <div className="flex items-center gap-3 mt-2">
+                {/* <img src="/path-to-icons/bed.svg" alt="bed" className="w-5 h-5" />
+                <img src="/path-to-icons/water.svg" alt="water" className="w-5 h-5" />
+                <img src="/path-to-icons/charging.svg" alt="charging" className="w-5 h-5" />
+                <img src="/path-to-icons/location.svg" alt="location" className="w-5 h-5" /> */}
+                <span className="text-gray-600"></span>
+                <div className="flex items-center text-blue-600">
+                  {/* <img src="/path-to-icons/tracking.svg" alt="tracking" className="w-5 h-5" /> */}
+                  {/* <span className="ml-1">Live Tracking</span> */}
+                </div>
+              </div>
+            </div>
+
+            {/* Time and Location */}
+            <div className="col-span-2 text-center">
+              <div className="text-xl font-bold">22:45</div>
+              <div className="text-sm text-gray-600">Yeshwantpur</div>
+            </div>
+
+            {/* Duration */}
+            <div className="col-span-2 text-center">
+              <div className="text-gray-600">07h 01m</div>
+            </div>
+
+            {/* Arrival */}
+            <div className="col-span-2 text-center">
+              <div className="text-xl font-bold">05:46</div>
+              <div className="text-sm text-gray-600">16-Jan</div>
+              <div className="text-sm text-gray-600">Pvs Circle</div>
+            </div>
+
+            {/* Ratings */}
+            <div className="col-span-1 text-center">
+              <div className="inline-flex items-center bg-green-500 text-white px-2 py-1 rounded">
+                <span>★ 4.5</span>
+              </div>
+              <div className="text-sm text-gray-600 mt-1">374</div>
+            </div>
+
+            {/* Price */}
+            <div className="col-span-1 text-right">
+              <div className="text-sm text-gray-600">Starts from</div>
+              <div className="text-sm text-gray-500 line-through">INR 600</div>
+              <div className="text-xl font-bold">540</div>
+              <div className="text-sm text-red-500">redDeal applied</div>
+            </div>
+
+            {/* Seats */}
+            <div className="col-span-1 text-right">
+              <div className="text-sm font-medium">9 Seats available</div>
+              <div className="text-sm text-gray-600">2 Window</div>
+            </div>
           </div>
-          <button className="bg-primary text-white px-4 py-2 rounded">
-            Modify Search
+        </div>
+
+        {/* Bottom Navigation */}
+        <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-t">
+          <div className="flex space-x-4 text-gray-600 text-sm">
+            <button className="hover:text-gray-800">Amenities</button>
+            <button className="hover:text-gray-800">Bus Photos</button>
+            <button className="hover:text-gray-800">Boarding & Dropping Points</button>
+            <button className="hover:text-gray-800">Reviews</button>
+            <button className="hover:text-gray-800">Booking policies</button>
+          </div>
+          <button onClick={() => (window.location.href = '/view-seats')} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+            VIEW SEATS
           </button>
         </div>
       </div>
-
-      <div className="space-y-4">
-        {buses.map((bus) => (
-          <div key={bus.id} className="border rounded-lg p-4 hover:shadow-lg transition">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="text-xl font-bold">{bus.operator}</h3>
-                <p className="text-gray-600">{bus.type}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-2xl font-bold">₹{bus.price}</p>
-                <p className="text-gray-600">{bus.seats} seats available</p>
-              </div>
-            </div>
-            <div className="flex justify-between items-center mt-4">
-              <div>
-                <p className="font-bold">{bus.departure}</p>
-                <p className="text-gray-600">Departure</p>
-              </div>
-              <div className="text-center">
-                <p className="text-gray-600">{bus.duration}</p>
-                <div className="w-32 h-0.5 bg-gray-300 my-2"></div>
-              </div>
-              <div className="text-right">
-                <p className="font-bold">{bus.arrival}</p>
-                <p className="text-gray-600">Arrival</p>
-              </div>
-            </div>
-            <div className="mt-4 flex justify-between items-center">
-              <div className="flex items-center">
-                <span className="text-yellow-500">★</span>
-                <span className="ml-1">{bus.rating}</span>
-              </div>
-              <button onClick={() => (window.location.href = '/view-seats')}className="bg-primary text-white px-6 py-2 rounded hover:bg-red-700">
-                View Seats
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   );
-}
+};
 
 export default BusList;
