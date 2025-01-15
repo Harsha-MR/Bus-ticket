@@ -59,3 +59,20 @@ export const sendTicketEmail = async (userEmail, emailSubject, emailText, emailH
   }
 };
 
+ export const sendEmail = async (userEmail, emailSubject, emailText, emailHtml) => {
+  try {
+     const mailOptions = {
+      from: process.env.EMAIL_USER, // Sender address
+      to:userEmail,
+      subject:emailSubject,
+      text:emailText,// Plain text body
+      html:emailHtml // HTML body (optional)
+    };
+  
+     await transporter.sendMail(mailOptions);
+    console.log(`Email sent to ${userEmail}`);
+   } catch (error) {
+     console.error("Error sending email:", error);
+   }
+};
+

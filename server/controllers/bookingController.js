@@ -7,6 +7,7 @@ import Route from "../models/Route.js"
 import { sendTicketEmail } from "../services/emailservice.js";
 import User from "../models/userModel.js"
 import { generateTicketPDF } from "../services/pdfgenerator.js";
+import {sendEmail} from "../services/emailservice.js"
 
 
 // export const createBooking = async (req, res) => {
@@ -325,53 +326,76 @@ export const bookSeats = async (req, res) => {
         return res.status(404).json({ message: "Bus not found" });
       }
   
-      // Calculate the difference between the current time and bus departure time
+      // Check cancellation time limit (24 hours before departure)
       const currentTime = new Date();
       const startTime = new Date(bus.startTime);
-      const timeDifference = (startTime - currentTime) / 1000 / 60 / 60; // Convert to hours
+      const timeDifference = (startTime - currentTime) / 1000 / 60 / 60;
   
-      // Check if the cancellation is allowed (must be at least 24 hours before departure)
       if (timeDifference < 24) {
-        return res.status(400).json({ message: "Cancellation allowed only 24 hours before the journey" });
+        return res.status(400).json({
+          message: "Cancellation allowed only 24 hours before the journey",
+        });
       }
   
-      // Update the seat status for the relevant bus and adjust availableSeats
       const { from, to, seatNumbers } = booking;
   
-      bus.segments.forEach((segment) => {
-        if (segment.from === from || segment.to === to) {
+      // Identify affected segments
+      const fromIndex = bus.route.indexOf(from);
+      const toIndex = bus.route.indexOf(to);
+  
+      if (fromIndex === -1 || toIndex === -1 || fromIndex >= toIndex) {
+        return res.status(400).json({ message: "Invalid route in booking." });
+      }
+  
+      // Track total seats being canceled
+      let totalSeatsToIncrement = 0;
+  
+      // Update the seats for relevant segments
+      for (let i = fromIndex; i < toIndex; i++) {
+        const segment = bus.segments.find(
+          (seg) => seg.from === bus.route[i] && seg.to === bus.route[i + 1]
+        );
+  
+        if (segment) {
           seatNumbers.forEach((seatNumber) => {
             const seat = segment.seats.find((s) => s.number === seatNumber);
             if (seat && seat.isBooked) {
-              seat.isBooked = false;
-              bus.availableSeats += 1; // Increment available seats count
+              seat.isBooked = false; // Mark the seat as not booked
             }
           });
         }
-      });
+      }
   
+      // Calculate seats to increment only once for the entire route
+      totalSeatsToIncrement += seatNumbers.length;
+  
+      // Increment available seats for the entire bus
+      bus.availableSeats += totalSeatsToIncrement;
+  
+      // Save updated bus document
       await bus.save();
   
       // Mark the booking as canceled
       booking.isCanceled = true;
-      booking.cancellationTime = new Date(); // Log the cancellation time
+      booking.cancellationTime = new Date();
       await booking.save();
-      
-      
   
-      // Send the cancellation email
+      // Send cancellation email
       const emailSubject = "Booking Cancellation";
-      const emailText = `Your booking for seats ${booking.seatNumbers.join(", ")} from ${booking.from} to ${booking.to} has been successfully canceled.`;
+      const emailText = `Your booking for seats ${booking.seatNumbers.join(
+        ", "
+      )} from ${booking.from} to ${booking.to} has been successfully canceled.`;
       const emailHtml = `
         <h2>Booking Cancellation</h2>
-        <p>Your booking for seats <strong>${booking.seatNumbers.join(", ")}</strong> from <strong>${booking.from}</strong> to <strong>${booking.to}</strong> has been successfully canceled.</p>
+        <p>Your booking for seats <strong>${booking.seatNumbers.join(
+          ", "
+        )}</strong> from <strong>${booking.from}</strong> to <strong>${
+        booking.to
+      }</strong> has been successfully canceled.</p>
       `;
-
-      const user = await User.findById(booking.userId); // Fetch user email
-      console.log(booking.userId);
-      
-      await sendEmail(user.email, emailSubject, emailText, emailHtml);
-
+  
+      await sendEmail(userEmail, emailSubject, emailText, emailHtml);
+  
       res.status(200).json({
         message: `Booking canceled successfully. Cancellation email sent to ${userEmail}.`,
         availableSeats: bus.availableSeats,
@@ -380,6 +404,7 @@ export const bookSeats = async (req, res) => {
       res.status(500).json({ message: error.message });
     }
   };
+  
   
 
   

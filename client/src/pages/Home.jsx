@@ -19,7 +19,7 @@ function Home() {
     <div className="min-h-[calc(100vh-64px)]">
       <div className="bg-primary text-white py-16">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold mb-8 text-center">Book Bus Tickets</h1>
+          <h1 className="text-4xl font-bold mb-8 text-center">India's No. 1 Online Bus Ticket Booking Site</h1>
           <div className="max-w-3xl mx-auto bg-white rounded-lg p-6">
             <form onSubmit={handleSearch} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -29,7 +29,7 @@ function Home() {
                     type="text"
                     value={from}
                     onChange={(e) => setFrom(e.target.value)}
-                    className="w-full p-2 border rounded"
+                    className="text-black w-full p-2 border rounded"
                     placeholder="Enter source city"
                   />
                 </div>
@@ -39,7 +39,7 @@ function Home() {
                     type="text"
                     value={to}
                     onChange={(e) => setTo(e.target.value)}
-                    className="w-full p-2 border rounded"
+                    className="text-black w-full p-2 border rounded "
                     placeholder="Enter destination city"
                   />
                 </div>
@@ -48,7 +48,7 @@ function Home() {
                   <DatePicker
                     selected={date}
                     onChange={(date) => setDate(date)}
-                    className="w-full p-2 border rounded"
+                    className=" text-black w-full p-2 border rounded"
                     minDate={new Date()}
                   />
                 </div>
@@ -91,6 +91,7 @@ function Home() {
           </div>
         </div>
       </div>
+      
     </div>
   );
 }
