@@ -8,6 +8,9 @@ import Booking from './pages/Booking';
 import Login from './pages/Login';
 import ViewSeats from './pages/ViewSeats';
 import PaymentPage from './pages/PaymentPage';
+import AppPromotion from './components/AppPromotion';
+import BookBusTickets from './components/BookBusTickets';
+import FAQSection from './components/FAQSection';
 function App() {
   return (
     <Router>
@@ -25,6 +28,9 @@ function App() {
             <Route path="/payment" element={<PaymentPage />} />
           </Routes>
         </main>
+        <AppPromotion />
+        <BookBusTickets />
+        <FAQSection />
         <Footer />
       </div>
     </Router>

@@ -39,7 +39,7 @@ function Footer() {
           </div>
         </div>
         <div className="mt-8 text-center">
-          <p>© 2024 getBus. All rights reserved.</p>
+          <p>© 2025 getBus. All rights reserved.</p>
         </div>
       </div>
     </footer>
