@@ -5,7 +5,7 @@ import Home from './pages/Home';
 import BusList from './pages/BusList';
 import BusDetails from './pages/BusDetails';
 import Booking from './pages/Booking';
-import Login from './pages/Login';
+import Register from './pages/Register';
 import ViewSeats from './pages/ViewSeats';
 import PaymentPage from './pages/PaymentPage';
 import AppPromotion from './components/AppPromotion';
@@ -22,7 +22,7 @@ function App() {
             <Route path="/buses" element={<BusList />} />
             <Route path="/bus/:id" element={<BusDetails />} />
             <Route path="/booking/:id" element={<Booking />} />
-            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
             {/* <Route path="/view-seats" element={<ViewSeats />} /> */}
             {/* <Route path="/view-seats" element={<BusDetails />} /> */}
             <Route path="/payment" element={<PaymentPage />} />
