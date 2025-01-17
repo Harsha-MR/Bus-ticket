@@ -24,6 +24,9 @@ function Register() {
         const response = await axios.post('http://localhost:3000/api/auth/register', formData);
         console.log('Registration successful:', response.data);
 
+        // Store the user's full name in local storage
+        localStorage.setItem('userName', formData.name);
+
         // Show success message
         setSuccessMessage('Registration successful! Redirecting to login...');
         setError('');
@@ -44,6 +47,9 @@ function Register() {
           password: formData.password,
         });
         console.log('Login successful:', response.data);
+
+        // Store the user's full name in local storage
+        localStorage.setItem('userName', formData.name);
 
         // Show success message
         setSuccessMessage('Login successful! Redirecting to homepage...');
@@ -196,5 +202,3 @@ function Register() {
 }
 
 export default Register;
-
-

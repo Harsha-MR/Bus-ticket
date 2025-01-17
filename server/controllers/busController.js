@@ -1,35 +1,68 @@
 //Fetch Buses for a Route
 
+// import Bus from "../models/Bus.js";
+// import Route from "../models/Route.js";
+
+
+// export const getBusesForRoute = async (req, res) => {
+//   try {
+//     const { source, destination } = req.body;
+//     console.log(source);
+//     console.log(destination);
+    
+//     if (!source || !destination) {
+//       return res.status(400).json({ message: "Source and destination are required." });
+//     }
+//     // Find the route matching source and destination
+//     const route = await Route.findOne({ source, destination });
+//     if (!route) {
+//       console.log(route);
+      
+//       return res.status(404).json({ message: "No route found" });
+//     }
+
+//     // Find buses for the route
+//     const buses = await Bus.find({ routeId: route._id });
+//     res.status(200).json(buses);
+//     console.log(buses);
+    
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
+
 import Bus from "../models/Bus.js";
 import Route from "../models/Route.js";
 
-
 export const getBusesForRoute = async (req, res) => {
   try {
-    const { source, destination } = req.body;
-    console.log(source);
-    console.log(destination);
-    
-    if (!source || !destination) {
-      return res.status(400).json({ message: "Source and destination are required." });
-    }
-    // Find the route matching source and destination
-    const route = await Route.findOne({ source, destination });
-    if (!route) {
-      console.log(route);
-      
-      return res.status(404).json({ message: "No route found" });
+    const { from, to, date } = req.query; // Using query parameters
+
+    if (!from || !to || !date) {
+      return res.status(400).json({ message: "Source, destination, and date are required." });
     }
 
-    // Find buses for the route
-    const buses = await Bus.find({ routeId: route._id });
+    // Find the route matching source and destination
+    const route = await Route.findOne({ source: from, destination: to });
+
+    if (!route) {
+      return res.status(404).json({ message: "No route found." });
+    }
+
+    // Find buses for the route and date
+    const buses = await Bus.find({ routeId: route._id, date });
+
+    if (!buses || buses.length === 0) {
+      return res.status(404).json({ message: "No buses found for the given criteria." });
+    }
+
     res.status(200).json(buses);
-    console.log(buses);
-    
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error fetching buses:", error);
+    res.status(500).json({ message: "An error occurred while fetching buses. Please try again later." });
   }
 };
+
 
 // Add a new bus
 
