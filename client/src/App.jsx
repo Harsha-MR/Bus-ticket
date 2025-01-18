@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import BusList from './pages/BusList';
+import Buses from './pages/BusList';
 import BusDetails from './pages/BusDetails';
 import Booking from './pages/Booking';
 import Register from './pages/Register';
@@ -19,7 +20,7 @@ function App() {
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/buses" element={<BusList />} />
+            <Route path="/buses" element={<Buses />} />
             <Route path="/bus/:id" element={<BusDetails />} />
             <Route path="/booking/:id" element={<Booking />} />
             <Route path="/register" element={<Register />} />

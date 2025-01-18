@@ -1,38 +1,86 @@
 //Fetch Buses for a Route
 
+// import Bus from "../models/Bus.js";
+// import Route from "../models/Route.js";
+
+// export const getBusesForRoute = async (req, res) => {
+//   try {
+//     const { source, destination } = req.body;
+//     console.log(source);
+//     console.log(destination);
+
+//     if (!source || !destination) {
+//       return res.status(400).json({ message: "Source and destination are required." });
+//     }
+//     // Find the route matching source and destination
+//     const route = await Route.findOne({ source, destination });
+//     if (!route) {
+//       console.log(route);
+
+//       return res.status(404).json({ message: "No route found" });
+//     }
+
+//     // Find buses for the route
+//     const buses = await Bus.find({ routeId: route._id });
+//     res.status(200).json(buses);
+//     console.log(buses);
+
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
+
 import Bus from "../models/Bus.js";
 import Route from "../models/Route.js";
 
-
 export const getBusesForRoute = async (req, res) => {
   try {
-    const { source, destination } = req.body;
-    console.log(source);
-    console.log(destination);
-    
-    if (!source || !destination) {
-      return res.status(400).json({ message: "Source and destination are required." });
+    const { from, to, date } = req.query; // Using query parameters
+
+
+    if (!from || !to || !date) {
+      return res
+        .status(400)
+        .json({ message: "Source, destination, and date are required." });
     }
+    
     // Find the route matching source and destination
-    const route = await Route.findOne({ source, destination });
+    const route = await Route.findOne({ source: from, destination: to });
+
+    
     if (!route) {
-      console.log(route);
-      
-      return res.status(404).json({ message: "No route found" });
+      return res.status(404).json({ message: "No route found." });
     }
 
-    // Find buses for the route
-    const buses = await Bus.find({ routeId: route._id });
-    res.status(200).json(buses);
-    console.log(buses);
     
+    // Find buses for the route and date
+    const startDate = new Date(`${date}T00:00:00.000+00:00`);
+    const endDate = new Date(`${date}T23:59:59.999+00:00`);
+
+    // Query buses where the date falls within the range
+    const buses = await Bus.find({
+      routeId: route._id,
+      startTime: { $gte: startDate, $lt: endDate },
+    });
+    
+    if (!buses || buses.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No buses found for the given criteria." });
+    }
+
+    
+    res.status(200).json(buses);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error fetching buses:", error);
+    res.status(500).json({
+      message:
+        "An error occurred while fetching buses. Please try again later.",
+    });
   }
 };
 
 // Add a new bus
-
 
 export const addBus = async (req, res) => {
   try {
@@ -47,13 +95,13 @@ export const addBus = async (req, res) => {
       startTime,
       endTime,
     } = req.body;
-  
+
     // Validate input
     if (
       !name ||
       !reg_num ||
       !totalSeats ||
-      !availableSeats||
+      !availableSeats ||
       !routeId ||
       !route ||
       !segments ||
@@ -73,18 +121,17 @@ export const addBus = async (req, res) => {
 
     const existingRoute = await Route.findById(routeId);
     if (!existingRoute) {
-      return res
-        .status(400)
-        .json({ message: "This route does not exits" });
+      return res.status(400).json({ message: "This route does not exits" });
     }
 
-    
     // Ensure arrivalTime and departureTime are valid Date objects
     const start = new Date(startTime);
     const end = new Date(endTime);
 
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-      return res.status(400).json({ message: "Invalid arrival or departure time." });
+      return res
+        .status(400)
+        .json({ message: "Invalid arrival or departure time." });
     }
 
     // Create the new bus
@@ -111,11 +158,25 @@ export const addBus = async (req, res) => {
 };
 
 // Get all buses
-export const getBuses = async (req, res) => {
+export const getAllBuses = async (req, res) => {
   try {
-    const buses = await Bookings.find().populate("routeId");
-    res.status(200).json(buses);
+    // Fetch all buses from the database
+    const buses = await Bus.find();
+
+    // Check if there are buses in the database
+    if (buses.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No buses found in the database." });
+    }
+
+    // Send the fetched buses as a response
+    res.status(200).json({
+      message: "Buses fetched successfully.",
+      buses,
+    });
   } catch (error) {
+    // Handle errors and respond
     res.status(500).json({ message: error.message });
   }
 };
@@ -124,11 +185,12 @@ export const getBuses = async (req, res) => {
 export const updateBus = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, reg_num, totalSeats, routeId, route,segments,seats} = req.body;
+    const { name, reg_num, totalSeats, routeId, route, segments, seats } =
+      req.body;
 
     const updatedBus = await Bus.findByIdAndUpdate(
       id,
-      { name, reg_num, totalSeats, routeId, route,segments,seats },
+      { name, reg_num, totalSeats, routeId, route, segments, seats },
       { new: true }
     );
 
@@ -136,7 +198,9 @@ export const updateBus = async (req, res) => {
       return res.status(404).json({ message: "Bus not found." });
     }
 
-    res.status(200).json({ message: "Bus updated successfully.", bus: updatedBus });
+    res
+      .status(200)
+      .json({ message: "Bus updated successfully.", bus: updatedBus });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -161,7 +225,6 @@ export const deleteBus = async (req, res) => {
 
 //booking of bus seat
 //seats are locked for the specified segment but remain available for other segments.
-
 
 // export const bookSeats = async (req, res) => {
 //   try {
@@ -241,21 +304,22 @@ export const deleteBus = async (req, res) => {
 //   }
 // };
 
-
 export const addRoute = async (req, res) => {
   try {
     const { source, destination, stops, duration, distance } = req.body;
 
     // Validate input
     if (!source || !destination || !duration || !distance) {
-      return res.status(400).json({ message: "Source, destination, duration, and distance are required." });
+      return res.status(400).json({
+        message: "Source, destination, duration, and distance are required.",
+      });
     }
 
     // Create a new route
     const newRoute = new Route({
       source,
       destination,
-      stops: stops || [],  // Default to an empty array if stops are not provided
+      stops: stops || [], // Default to an empty array if stops are not provided
       duration,
       distance,
     });
@@ -263,11 +327,10 @@ export const addRoute = async (req, res) => {
     // Save the route to the database
     await newRoute.save();
 
-    res.status(201).json({ message: "Route added successfully.", route: newRoute });
+    res
+      .status(201)
+      .json({ message: "Route added successfully.", route: newRoute });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
-
-
