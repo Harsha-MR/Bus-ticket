@@ -15,7 +15,11 @@ function Home() {
 
   const southIndianCities = [
     "Chennai",
-    "Bangalore",
+    "Bengaluru",
+    "Dharwad",
+    "Dharmasthala",
+    "Kerala",
+    "Ooty",
     "Hyderabad",
     "Coimbatore",
     "Kochi",

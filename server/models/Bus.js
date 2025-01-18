@@ -5,6 +5,14 @@ const seatSchema = new mongoose.Schema({
   isBooked: { type: Boolean, default: false },
 });
 
+const boardingSchema = new mongoose.Schema({
+  bpName : {type : String, required : true}
+})
+
+const dropingSchema = new mongoose.Schema({
+  dpName : {type : String, required : true}
+})
+
 const segmentSchema = new mongoose.Schema({
   from: { type: String, required: true },
   to: { type: String, required: true },
@@ -13,7 +21,9 @@ const segmentSchema = new mongoose.Schema({
 
 const busSchema = new mongoose.Schema(
   {
+    id: {type :String, required : true},
     name: { type: String, required: true }, // e.g., "Volvo AC"
+    type : {type : String, required : true},
     reg_num: { type: String, required: true, unique: true }, // e.g., "KA-01-1234"
     totalSeats: { type: Number, required: true }, // Total number of seats in the bus
     availableSeats: { type: Number}, // Number of currently available seats
@@ -23,6 +33,15 @@ const busSchema = new mongoose.Schema(
     //seats: { type: Number, required: true }, // Duplicate with `totalSeats`, but included for compatibility
     startTime: { type: Date, required: true }, // Arrival time of the bus
     endTime: { type: Date, required: true }, // Departure time of the bus
+    duration : {type : String, required:true},
+    reviews : {type : String, required:true},
+    price : {type : String, required:true},
+    originalPrice : {type : String, required:true},
+    boardingPoints :[boardingSchema],
+    dropingPoints : [dropingSchema],
+    distance : {type : String, required : true},
+    ratings : {type : String, required : true}
+
   },
   { timestamps: true }
 );
