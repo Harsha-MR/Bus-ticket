@@ -3,12 +3,13 @@ import { useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaBus, FaCalendarAlt, FaExchangeAlt } from "react-icons/fa"; // Importing icons
+import axios from "axios";
 
 function Home() {
   const navigate = useNavigate();
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState(null);
   const [fromDropdown, setFromDropdown] = useState([]);
   const [toDropdown, setToDropdown] = useState([]);
 
@@ -25,26 +26,46 @@ function Home() {
     "Thiruvananthapuram",
   ];
 
+  const handleDateChange = (selectedDate) => {
+    const formattedDate = selectedDate.toISOString().split("T")[0];
+    setDate(formattedDate);
+  };
+
   // Generate all possible direct routes
   const possibleRoutes = southIndianCities.flatMap((source) =>
-    southIndianCities.filter((destination) => source !== destination).map((destination) => ({
-      from: source,
-      to: destination,
-    }))
+    southIndianCities
+      .filter((destination) => source !== destination)
+      .map((destination) => ({
+        from: source,
+        to: destination,
+      }))
   );
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
+
+    // Check if the route is valid
     const isValidRoute = possibleRoutes.some(
       (route) =>
         route.from.toLowerCase() === from.toLowerCase() &&
         route.to.toLowerCase() === to.toLowerCase()
     );
 
-    if (isValidRoute) {
-      navigate("/buses", { state: { from, to, date } });
+    if (isValidRoute && from && to && date) {
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/api/buses/?from=${from}&to=${to}&date=${date}`
+        );
+
+        console.log(response.data); // Handle the bus data here if needed
+
+        navigate("/buses", { state: { from, to, date } });
+      } catch (error) {
+        console.error("Error fetching buses:", error);
+        alert("There was an error fetching bus data. Please try again later.");
+      }
     } else {
-      alert("No direct bus route exists between the selected cities.");
+      alert("Please select valid cities and a date for the trip.");
     }
   };
 
@@ -143,8 +164,8 @@ function Home() {
                 <div>
                   <label className="block text-gray-700 mb-2">Date</label>
                   <DatePicker
-                    selected={date}
-                    onChange={(date) => setDate(date)}
+                    selected={date ? new Date(date) : null}
+                    onChange={handleDateChange}
                     className="text-black w-full p-2 border rounded"
                     minDate={new Date()}
                   />
@@ -163,21 +184,27 @@ function Home() {
 
       {/* Features Section */}
       <div className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl font-bold text-center mb-12">Why Choose getBus?</h2>
+        <h2 className="text-3xl font-bold text-center mb-12">
+          Why Choose getBus?
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="text-center">
             <div className="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <FaBus className="text-2xl" />
             </div>
             <h3 className="text-xl font-bold mb-2">2000+ Bus Partners</h3>
-            <p className="text-gray-600">Book tickets from a wide range of bus operators</p>
+            <p className="text-gray-600">
+              Book tickets from a wide range of bus operators
+            </p>
           </div>
           <div className="text-center">
             <div className="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <FaCalendarAlt className="text-2xl" />
             </div>
             <h3 className="text-xl font-bold mb-2">Easy Cancellation</h3>
-            <p className="text-gray-600">Get instant refund and reschedule options</p>
+            <p className="text-gray-600">
+              Get instant refund and reschedule options
+            </p>
           </div>
           <div className="text-center">
             <div className="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
