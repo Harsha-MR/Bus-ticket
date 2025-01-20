@@ -215,7 +215,6 @@
 // };
 
 // export default PaymentPage;
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -250,33 +249,49 @@ function Payment() {
       setLoading(true);
       setError('');
 
-      // Get the seat numbers from the selected seat IDs
-      const seatNumbers = selectedSeats.map((seatId) => 
-        bus.segments
-          .flatMap(segment => segment.seats)
-          .find(seat => seat._id === seatId)?.number
-      ).filter(Boolean);
-      console.log(bus._id,bus.route[0], bus.route[bus.route.length - 1], seatNumbers);
-      
-      const response = await axios.post(`http://localhost:3000/api/bookings/${bus._id}/book-seats`, {
+      // Extract seat numbers from selected seats
+      const seatNumbers = selectedSeats.map((seatId) => {
+        const seat = bus.segments[0].seats.find(seat => seat._id === seatId);
+        return seat?.number;
+      }).filter(Boolean);
+
+      // Validate that we have seat numbers
+      if (!seatNumbers.length) {
+        throw new Error('No valid seats selected');
+      }
+
+      // Prepare the request payload
+      const payload = {
         busId: bus._id,
         from: bus.route[0],
         to: bus.route[bus.route.length - 1],
-        to: seatNumbers
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-          // Add your authentication token here if required
-          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3OGJkNjcxZTZhMGQxMzM1MzUzNWMxMSIsImVtYWlsIjoiaEBnbWFpbC5jb20iLCJuYW1lIjoiaGFyc2hhIiwiaWF0IjoxNzM3NDAzNjQ5LCJleHAiOjE3Mzc0ODI4NDl9.ac5qmVM3iGb_Z3YEsOn-3xATmdAU8S2kJuIkHPl1O1M`
+        seats: seatNumbers
+      };
+
+      console.log('Sending payload:', payload); // Debug log
+
+      const response = await axios.post(
+        `http://localhost:3000/api/bookings/${bus._id}/book-seats`,
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            // Add your authentication token here
+            'Authorization': `Bearer `
+          }
         }
-      });
+      );
 
       if (response.data) {
         setShowPopup(true);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'An error occurred while processing your booking');
       console.error('Booking error:', err);
+      setError(
+        err.response?.data?.message || 
+        err.message || 
+        'An error occurred while processing your booking'
+      );
     } finally {
       setLoading(false);
     }
@@ -290,6 +305,9 @@ function Payment() {
   const getDate = (datetime) => {
     return datetime.split('T')[0];
   };
+
+  // Validate if we can proceed with payment
+  const canProceed = selectedSeats?.length > 0 && bus;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -315,20 +333,21 @@ function Payment() {
             <strong>To:</strong> {bus?.route[bus?.route.length - 1]}
           </p>
           <p>
-            <strong>Date:</strong> {getDate(bus?.endTime)}
+            <strong>Date:</strong> {bus?.endTime && getDate(bus.endTime)}
           </p>
           <p>
-            <strong>Time:</strong> {new Date(bus?.startTime).toLocaleTimeString()}
+            <strong>Time:</strong> {bus?.startTime && new Date(bus.startTime).toLocaleTimeString()}
           </p>
           <p>
             <strong>Selected Seats:</strong>{' '}
-            {selectedSeats.length > 0 ? selectedSeats.map((seatId) => 
-              bus.segments.flatMap(segment => segment.seats).find(seat => seat._id === seatId)?.number
-            ).join(', ') : 'No seats selected'}
+            {selectedSeats?.length > 0 ? selectedSeats.map((seatId) => {
+              const seat = bus.segments[0].seats.find(s => s._id === seatId);
+              return seat?.number;
+            }).filter(Boolean).join(', ') : 'No seats selected'}
           </p>
           <p>
             <strong>Total Amount:</strong> ₹
-            {selectedSeats?.length * parseInt(bus?.price)}
+            {selectedSeats?.length * (parseInt(bus?.price) || 0)}
           </p>
         </div>
 
@@ -359,7 +378,7 @@ function Payment() {
           </div>
 
           {/* Credit/Debit Card */}
-          <div className="p-4 border rounded mb-4 cursor-pointer">
+          <div className="p-4 border rounded mb-4">
             <h4 className="text-lg font-bold">Credit/Debit Card</h4>
             <div className="mt-2">
               <input
@@ -380,7 +399,7 @@ function Payment() {
               <button 
                 className="w-full py-2 bg-primary text-white rounded"
                 onClick={handlePaymentSuccess}
-                disabled={loading}
+                disabled={loading || !canProceed}
               >
                 {loading ? 'Processing...' : 'Pay with Card'}
               </button>
@@ -406,9 +425,9 @@ function Payment() {
           {/* Proceed Button */}
           <button
             onClick={handlePaymentSuccess}
-            disabled={loading}
+            disabled={loading || !canProceed}
             className={`w-full py-3 mt-4 rounded-lg bg-primary text-white hover:bg-red-700 ${
-              loading ? 'opacity-50 cursor-not-allowed' : ''
+              (loading || !canProceed) ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >
             {loading ? 'Processing Payment...' : 'Proceed to Payment'}
