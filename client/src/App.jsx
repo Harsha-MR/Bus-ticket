@@ -7,7 +7,6 @@ import Buses from './pages/BusList';
 import BusDetails from './pages/BusDetails';
 import Booking from './pages/Booking';
 import Register from './pages/Register';
-import ViewSeats from './pages/ViewSeats';
 import PaymentPage from './pages/PaymentPage';
 import AppPromotion from './components/AppPromotion';
 import BookBusTickets from './components/BookBusTickets';

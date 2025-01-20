@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { number } from "zod";
 
 const routeSchema = new mongoose.Schema(
   {
@@ -30,6 +31,7 @@ const routeSchema = new mongoose.Schema(
         type: String, 
         required: true 
     }, // e.g., "300km"
+    
   },
   { timestamps: true }
 );

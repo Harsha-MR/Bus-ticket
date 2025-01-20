@@ -168,7 +168,8 @@ export const getBookingHistory = async (req, res) => {
 // };
 
 
-//for book seats
+//for book 
+
 export const bookSeats = async (req, res) => {
   try {
     const { busId, from, to, seats } = req.body;
