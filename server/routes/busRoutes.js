@@ -16,7 +16,7 @@ router.get("/",getBusesForRoute);
 // Routes for managing buses
 router.post("/", authMiddleware, adminMiddleware, addBus); // Add a new bus
 router.get("/getBuses", authMiddleware, getAllBuses); // Get all buses
-router.get("/getBuses/:id", authMiddleware, getBusById); // Get bus by ID
+router.get("/getBuses/:busId", authMiddleware, getBusById); // Get bus by ID
 router.put("/:id", authMiddleware, adminMiddleware, updateBus); // Update bus details
 router.delete("/:id", authMiddleware, adminMiddleware, deleteBus); // Delete a bus
 
