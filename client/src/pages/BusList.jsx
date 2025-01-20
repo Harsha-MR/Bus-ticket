@@ -227,7 +227,7 @@ import { useNavigate } from "react-router-dom";
 
 function Buses() {
   const { state } = useLocation();
-  const { from, to, date } = state || {};
+  const { from, to, date,  } = state || {};
   const [buses, setBuses] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true); // Added loading state
@@ -264,6 +264,8 @@ function Buses() {
           `http://localhost:3000/api/buses?from=${from}&to=${to}&date=${date}`
         );
         setBuses(response.data); // Assuming response.data contains an array of buses
+        console.log(response.data[0]._id);
+        
         setLoading(false); // Set loading to false once data is received
       } catch (err) {
         setError(err.response?.data?.message || "Failed to fetch buses");
@@ -290,9 +292,23 @@ function Buses() {
     }));
   };
 
-  const handleBooking = (busId) => {
-    navigate(`/bus/${busId}`); // Navigate to BusDetails page with the busId as a parameter
+  const handleBooking = async (busId) => {
+    try {
+      // Fetch buses based on parameters
+      const response = await axios.get(
+        `http://localhost:3000/api/buses?from=${from}&to=${to}&date=${date}`
+      );
+      console.log("from busllist",response.data[0].reg_num);
+      const busId = response.data[0].reg_num;
+      console.log("from buslist",busId);
+      navigate(`/bus/${busId}`,{ state: { busId} }); 
+    } catch (err) {
+      // Handle errors and stop loading
+      setError(err.response?.data?.message || "Failed to fetch buses");
+      
+    }
   };
+  
 
   if (loading) {
     return <div>Loading buses...</div>; // Loading indicator while fetching

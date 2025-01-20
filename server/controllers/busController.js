@@ -229,6 +229,65 @@ export const getAllBuses = async (req, res) => {
   }
 };
 
+//Fetch bus by it's ID
+export const getBusById = async (req, res) => {
+  try {
+    const { busId } = req.params; // assuming busId is passed in the URL params
+    const bus = await Bus.findById(busId);
+
+    if (!bus) {
+      return res
+        .status(404)
+        .json({ message: `Bus with ID ${busId} not found.` });
+    }
+
+    res.status(200).json({
+      message: "Bus fetched successfully.",
+      bus,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+//Fetch bus by its ID
+// Fetch bus by any unique attribute
+// export const getBusByAttribute = async (req, res) => {
+//   try {
+//     const { attribute, value } = req.params; // Expecting attribute and value in the route params
+
+//     if (!attribute || !value) {
+//       return res.status(400).json({ message: "Attribute and value are required." });
+//     }
+
+//     Dynamic query construction
+    // const query = { [attribute]: value };
+
+//     // Fetch the bus based on the unique attribute
+//     const bus = await Bus.findOne(query);
+
+//     if (!bus) {
+//       return res
+//         .status(404)
+//         .json({ message: `Bus with ${attribute} '${value}' not found.` });
+//     }
+
+//     return res.status(200).json({
+//       message: `Bus fetched successfully by ${attribute}.`,
+//       bus,
+//     });
+//   } catch (error) {
+//     // Handle errors, such as invalid attribute or database issues
+//     if (error.name === "CastError" || error.codeName === "BadValue") {
+//       return res.status(400).json({ message: "Invalid query format or attribute." });
+//     }
+//     return res.status(500).json({ message: error.message });
+//   }
+// };
+
+
+
+
+
 // Delete a bus
 export const deleteBus = async (req, res) => {
   try {

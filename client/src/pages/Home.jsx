@@ -63,7 +63,7 @@ function Home() {
 
         console.log(response.data); // Handle the bus data here if needed
 
-        navigate("/buses", { state: { from, to, date } });
+        navigate("/buses", { state: { from, to, date, } });
       } catch (error) {
         console.error("Error fetching buses:", error);
         alert("There was an error fetching bus data. Please try again later.");
