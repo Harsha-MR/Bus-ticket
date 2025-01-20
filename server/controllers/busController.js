@@ -47,11 +47,12 @@ export const getBusesForRoute = async (req, res) => {
 export const addBus = async (req, res) => {
   try {
     const {
-      id,
+      // busId,
       name,
       type,
       reg_num,
       totalSeats,
+      // availableSeats,
       routeId,
       route,
       segments,
@@ -69,11 +70,12 @@ export const addBus = async (req, res) => {
 
     // Validate input
     if (
-      !id ||
+      // !busId ||
       !name ||
       !type ||
       !reg_num ||
       !totalSeats ||
+      // !availableSeats ||
       !routeId ||
       !route ||
       !segments ||
@@ -116,7 +118,7 @@ export const addBus = async (req, res) => {
 
     // Create the new bus
     const newBus = new Bus({
-      id,
+      // busId,
       name,
       reg_num,
       type,
