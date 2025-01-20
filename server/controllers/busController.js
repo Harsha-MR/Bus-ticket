@@ -235,6 +235,8 @@ export const getBusById = async (req, res) => {
     const { busId } = req.params; // assuming busId is passed in the URL params
     const bus = await Bus.findById(busId);
 
+    
+
     if (!bus) {
       return res
         .status(404)
