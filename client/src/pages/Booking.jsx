@@ -1,10 +1,11 @@
-// import { useState } from 'react';
-// import { useParams, useLocation } from 'react-router-dom';
+
+// import { useState, useEffect } from 'react';
+// import { useLocation, useNavigate } from 'react-router-dom';
 
 // function Booking() {
-//   const { id } = useParams();
-//   const location = useLocation();
-//   const selectedSeats = location.state?.selectedSeats || [];
+//   const { state } = useLocation();
+//   const { selectedSeats, bus } = state || {};
+//   const navigate = useNavigate();
 
 //   const [formData, setFormData] = useState({
 //     name: '',
@@ -13,6 +14,14 @@
 //     age: '',
 //     gender: 'male',
 //   });
+
+//   const [isFormValid, setIsFormValid] = useState(false);
+
+//   useEffect(() => {
+//     // Check if the form is valid
+//     const { name, email, phone, age, gender } = formData;
+//     setIsFormValid(name && email && phone && age && gender);
+//   }, [formData]);
 
 //   const handleInputChange = (e) => {
 //     const { name, value } = e.target;
@@ -25,7 +34,21 @@
 //   const handleSubmit = (e) => {
 //     e.preventDefault();
 //     // Handle booking submission
-//     console.log('Booking submitted:', { ...formData, busId: id, selectedSeats });
+//     console.log('Booking submitted:', { ...formData, busId: bus._id, selectedSeats });
+//   };
+
+//   const handlePayment = () => {
+//     if (isFormValid) {
+//       // Navigate to payment page and pass selectedSeats and bus object
+//       navigate('/payment', {
+//         state: {
+//           selectedSeats,
+//           bus,
+//         },
+//       });
+//     } else {
+//       alert('Please fill out all the required fields');
+//     }
 //   };
 
 //   return (
@@ -101,14 +124,18 @@
 
 //           <div className="border-t pt-4 mt-6">
 //             <h3 className="text-lg font-bold mb-2">Booking Summary</h3>
-//             <p>Selected Seats: {selectedSeats.join(', ')}</p>
+//             <p>
+//               Selected Seats: 
+//               {selectedSeats.length > 0 ? selectedSeats.map((seatId) => bus.segments.flatMap(segment => segment.seats).find(seat => seat._id === seatId)?.number).join(', ') : 'No seats selected'}
+//             </p>
 //             <p className="text-xl font-bold mt-2">Total Amount: ₹{selectedSeats.length * 899}</p>
 //           </div>
 
 //           <button
-//             onClick={() => (window.location.href = '/payment')}
-//             type="submit"
-//             className="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-red-700"
+//             type="button"
+//             onClick={handlePayment}
+//             disabled={!isFormValid}
+//             className={`w-full py-3 rounded-lg font-bold ${isFormValid ? 'bg-primary text-white hover:bg-red-700' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`}
 //           >
 //             Proceed to Payment
 //           </button>
@@ -119,7 +146,6 @@
 // }
 
 // export default Booking;
-
 
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -153,19 +179,21 @@ function Booking() {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle booking submission
-    console.log('Booking submitted:', { ...formData, busId: bus._id, selectedSeats });
-  };
-
   const handlePayment = () => {
     if (isFormValid) {
-      // Navigate to payment page and pass selectedSeats and bus object
+      // Get seat numbers from selected seats
+      const seatNumbers = selectedSeats.map((seatId) => {
+        const seat = bus.segments[0].seats.find(s => s._id === seatId);
+        // Extract only the number from seat number (e.g., "L15" -> 15)
+        return parseInt(seat?.number.replace(/[^0-9]/g, ''), 10);
+      });
+
+      // Navigate to payment page with all necessary data
       navigate('/payment', {
         state: {
-          selectedSeats,
+          selectedSeats: seatNumbers, // Send parsed seat numbers
           bus,
+          userData: formData // Pass user data to payment page
         },
       });
     } else {
@@ -178,7 +206,7 @@ function Booking() {
       <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6">
         <h2 className="text-2xl font-bold mb-6">Passenger Details</h2>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form className="space-y-4">
           <div>
             <label className="block text-gray-700 mb-2">Full Name</label>
             <input
@@ -247,17 +275,24 @@ function Booking() {
           <div className="border-t pt-4 mt-6">
             <h3 className="text-lg font-bold mb-2">Booking Summary</h3>
             <p>
-              Selected Seats: 
-              {selectedSeats.length > 0 ? selectedSeats.map((seatId) => bus.segments.flatMap(segment => segment.seats).find(seat => seat._id === seatId)?.number).join(', ') : 'No seats selected'}
+              Selected Seats: {' '}
+              {selectedSeats?.length > 0 ? selectedSeats.map((seatId) => {
+                const seat = bus.segments[0].seats.find(s => s._id === seatId);
+                return seat?.number;
+              }).join(', ') : 'No seats selected'}
             </p>
-            <p className="text-xl font-bold mt-2">Total Amount: ₹{selectedSeats.length * 899}</p>
+            <p className="text-xl font-bold mt-2">
+              Total Amount: ₹{selectedSeats?.length * (parseInt(bus?.price) || 0)}
+            </p>
           </div>
 
           <button
             type="button"
             onClick={handlePayment}
             disabled={!isFormValid}
-            className={`w-full py-3 rounded-lg font-bold ${isFormValid ? 'bg-primary text-white hover:bg-red-700' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`}
+            className={`w-full py-3 rounded-lg font-bold ${
+              isFormValid ? 'bg-primary text-white hover:bg-red-700' : 'bg-gray-400 text-gray-700 cursor-not-allowed'
+            }`}
           >
             Proceed to Payment
           </button>

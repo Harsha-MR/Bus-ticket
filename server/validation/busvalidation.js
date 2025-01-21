@@ -7,3 +7,4 @@ export const bookSeatsSchema = z.object({
   seats: z.array(z.number().int().positive("Seat numbers must be positive integers."))
     .min(1, "At least one seat must be selected."),
 });
+  
