@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaEnvelope, FaLock, FaUser, FaPhone } from 'react-icons/fa';
@@ -24,17 +25,18 @@ function Register() {
         const response = await axios.post('http://localhost:3000/api/auth/register', formData);
         console.log('Registration successful:', response.data);
 
-        // Store the user's full name in local storage
-        localStorage.setItem('userName', formData.name);
+        // Check for the response message
+        if (response.data && response.data.message === 'User registered successfully') {
+          setSuccessMessage('Registration successful! Redirecting to login...');
+          setError('');
 
-        // Show success message
-        setSuccessMessage('Registration successful! Redirecting to login...');
-        setError('');
-
-        // Wait for 2 seconds, then redirect to the login page
-        setTimeout(() => {
-          toggleMode(); // Switch to login mode
-        }, 2000);
+          // Wait for 2 seconds, then switch to login mode
+          setTimeout(() => {
+            toggleMode(); // Switch to login mode
+          }, 2000);
+        } else {
+          setError('Registration failed. Please try again.');
+        }
       } catch (error) {
         setError(error.response?.data?.message || 'Registration failed. Please try again.');
         console.error('Error:', error.response ? error.response.data : error.message);
@@ -46,10 +48,10 @@ function Register() {
           email: formData.email,
           password: formData.password,
         });
-        console.log('Login successful:', response.data);
+        console.log('Login successful:', response.data.user.name);
 
         // Store the user's full name in local storage
-        localStorage.setItem('userName', formData.name);
+        localStorage.setItem('userName', response.data.user.name);
 
         // Show success message
         setSuccessMessage('Login successful! Redirecting to homepage...');
