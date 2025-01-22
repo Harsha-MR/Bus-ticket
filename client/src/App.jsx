@@ -12,6 +12,7 @@ import AppPromotion from './components/AppPromotion';
 import BookBusTickets from './components/BookBusTickets';
 import FAQSection from './components/FAQSection';
 import CancelBooking from './pages/CancelBooking.jsx';
+import BookingHistory from './pages/BookingHistory.jsx';
 function App() {
   return (
     <Router>
@@ -27,6 +28,7 @@ function App() {
             {/* <Route path="/view-seats" element={<ViewSeats />} /> */}
             {/* <Route path="/view-seats" element={<BusDetails />} /> */}
             <Route path="/payment" element={<PaymentPage />} />
+            <Route path="/history" element={<BookingHistory />} />
             <Route path="/cancel-booking" element={<CancelBooking />} />
           </Routes>
         </main>

@@ -290,7 +290,7 @@ function Payment() {
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3OGYzMDdkZTJlNzdlNjVjNzNkZTczZSIsImVtYWlsIjoiaGFyc2hha3VtYXJtcjg4QGdtYWlsLmNvbSIsIm5hbWUiOiJoYXJzaGEiLCJpYXQiOjE3Mzc0NDU2NDYsImV4cCI6MTczNzUyNDg0Nn0.8ftu1lhNOYHSKM7H-6Gq6B-ntJQGQaOqzoNG-WaD8hg` // Get token from localStorage
+            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3OGYzMDdkZTJlNzdlNjVjNzNkZTczZSIsImVtYWlsIjoiaGFyc2hha3VtYXJtcjg4QGdtYWlsLmNvbSIsIm5hbWUiOiJoYXJzaGEiLCJpYXQiOjE3Mzc1NjA1NDAsImV4cCI6MTczNzYzOTc0MH0.lXj1D1X6hHVXvfHHu31CfpjrI9hwOU6wTMiw0SVc13s` // Get token from localStorage
           }
         }
       );
