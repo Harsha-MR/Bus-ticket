@@ -244,7 +244,6 @@
 // }
 
 // export default Payment;
-
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -258,15 +257,20 @@ function Payment() {
   const [showPopup, setShowPopup] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('');
 
   useEffect(() => {
-    if (!selectedSeats || !bus || !userData) {
+    // Retrieve user data from localStorage as backup
+    const storedUserData = JSON.parse(localStorage.getItem('bookingUserData'));
+    
+    if (!selectedSeats || !bus || (!userData && !storedUserData)) {
       navigate('/');
     }
   }, [selectedSeats, bus, userData, navigate]);
 
   const handleUpiToggle = () => {
     setShowUpi(!showUpi);
+    setPaymentMethod('upi');
   };
 
   const handlePaymentSuccess = async () => {
@@ -274,15 +278,28 @@ function Payment() {
       setLoading(true);
       setError('');
 
-      // Prepare the request payload
+      // Get user data from state or localStorage
+      const userInfo = userData || JSON.parse(localStorage.getItem('bookingUserData'));
+
+      if (!userInfo || !userInfo.email) {
+        throw new Error('User email is required for booking');
+      }
+
       const payload = {
         busId: bus._id,
         from: bus.route[0],
         to: bus.route[bus.route.length - 1],
-        seats: selectedSeats, // These are already parsed numbers from the Booking page
-        email: userData.email, // Include user's email from the booking form
-        name: userData.name // Include user's name from the booking form
+        seats: selectedSeats,
+        email: userInfo.email,
+        name: userInfo.name,
+        phone: userInfo.phone,
+        paymentMethod: paymentMethod || 'card'
       };
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication token is missing');
+      }
 
       const response = await axios.post(
         `http://localhost:3000/api/bookings/${bus._id}/book-seats`,
@@ -290,12 +307,14 @@ function Payment() {
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3N2MwNjA5YTIzOTk5Mzc2YzAwNzZlMSIsImVtYWlsIjoibkBnbWFpbC5jb20iLCJuYW1lIjoibmlzaGFudGgiLCJpYXQiOjE3Mzc1MjUxNDMsImV4cCI6MTczNzYwNDM0M30.CZ4fpeEPs2E9Cq0L29U5yVXHmXLmD9Ng7nhyo9hGjP8` // Get token from localStorage
+            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3N2MwNjA5YTIzOTk5Mzc2YzAwNzZlMSIsImVtYWlsIjoibkBnbWFpbC5jb20iLCJuYW1lIjoibmlzaGFudGgiLCJpYXQiOjE3Mzc1Mjc1NTAsImV4cCI6MTczNzYwNjc1MH0.8cCMr5WhCZxf5RK0JgXI1kBBp6Ej617PJ0GNzqjZMHc`
           }
         }
       );
 
       if (response.data) {
+        // Clear stored user data
+        localStorage.removeItem('bookingUserData');
         setShowPopup(true);
       }
     } catch (err) {
@@ -316,11 +335,15 @@ function Payment() {
   };
 
   const getDate = (datetime) => {
-    return datetime.split('T')[0];
+    return datetime ? new Date(datetime).toLocaleDateString() : '';
   };
 
-  // Validate if we can proceed with payment
-  const canProceed = selectedSeats?.length > 0 && bus;
+  const getTime = (datetime) => {
+    return datetime ? new Date(datetime).toLocaleTimeString() : '';
+  };
+
+  // Get user data from state or localStorage
+  const userInfo = userData || JSON.parse(localStorage.getItem('bookingUserData')) || {};
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -336,28 +359,30 @@ function Payment() {
         {/* Booking Summary */}
         <div className="mb-6">
           <h3 className="text-lg font-bold mb-2">Booking Details</h3>
-          <p><strong>Passenger Name:</strong> {userData?.name}</p>
-          <p><strong>Email:</strong> {userData?.email}</p>
-          <p><strong>Phone:</strong> {userData?.phone}</p>
-          <p><strong>Bus Name:</strong> {bus?.name}</p>
-          <p><strong>From:</strong> {bus?.route[0]}</p>
-          <p><strong>To:</strong> {bus?.route[bus?.route.length - 1]}</p>
-          <p><strong>Date:</strong> {bus?.endTime && getDate(bus.endTime)}</p>
-          <p><strong>Time:</strong> {bus?.startTime && new Date(bus.startTime).toLocaleTimeString()}</p>
-          <p><strong>Selected Seats:</strong> {selectedSeats?.join(', ')}</p>
-          <p className="text-xl font-bold mt-2">
-            Total Amount: ₹{selectedSeats?.length * (parseInt(bus?.price) || 0)}
-          </p>
+          <div className="space-y-2">
+            <p><strong>Passenger Name:</strong> {userInfo.name}</p>
+            <p><strong>Email:</strong> {userInfo.email}</p>
+            <p><strong>Phone:</strong> {userInfo.phone}</p>
+            <p><strong>Bus Name:</strong> {bus?.name}</p>
+            <p><strong>From:</strong> {bus?.route[0]}</p>
+            <p><strong>To:</strong> {bus?.route[bus?.route.length - 1]}</p>
+            <p><strong>Date:</strong> {getDate(bus?.startTime)}</p>
+            <p><strong>Time:</strong> {getTime(bus?.startTime)}</p>
+            <p><strong>Selected Seats:</strong> {selectedSeats?.join(', ')}</p>
+            <p className="text-xl font-bold mt-2">
+              Total Amount: ₹{selectedSeats?.length * (parseInt(bus?.price) || 0)}
+            </p>
+          </div>
         </div>
 
         {/* Payment Methods */}
         <div className="border-t pt-4 mt-6">
-          <h3 className="text-lg font-bold mb-2">Select Payment Method</h3>
+          <h3 className="text-lg font-bold mb-4">Select Payment Method</h3>
 
           {/* UPI Payment */}
           <div
-            className={`p-4 border rounded mb-4 cursor-pointer ${
-              showUpi ? 'bg-gray-200' : ''
+            className={`p-4 border rounded mb-4 cursor-pointer transition-colors duration-200 ${
+              paymentMethod === 'upi' ? 'bg-blue-50 border-blue-500' : 'hover:bg-gray-50'
             }`}
             onClick={handleUpiToggle}
           >
@@ -371,66 +396,65 @@ function Payment() {
                     alt="UPI QR Code"
                     className="w-32 h-32 mx-auto"
                   />
+                  <button
+                    onClick={handlePaymentSuccess}
+                    disabled={loading}
+                    className="w-full mt-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors duration-200"
+                  >
+                    {loading ? 'Processing...' : 'Confirm UPI Payment'}
+                  </button>
                 </div>
               </div>
             )}
           </div>
 
           {/* Credit/Debit Card */}
-          <div className="p-4 border rounded mb-4">
+          <div className={`p-4 border rounded mb-4 ${paymentMethod === 'card' ? 'bg-blue-50 border-blue-500' : ''}`}>
             <h4 className="text-lg font-bold">Credit/Debit Card</h4>
             <div className="mt-2">
               <input
                 type="text"
                 placeholder="Card Number"
-                className="w-full p-2 border rounded mb-2"
+                className="w-full p-2 border rounded mb-2 focus:ring-2 focus:ring-blue-500"
+                onClick={() => setPaymentMethod('card')}
               />
-              <input
-                type="text"
-                placeholder="Expiration Date"
-                className="w-full p-2 border rounded mb-2"
-              />
-              <input
-                type="text"
-                placeholder="CVV"
-                className="w-full p-2 border rounded mb-2"
-              />
+              <div className="grid grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  placeholder="MM/YY"
+                  className="w-full p-2 border rounded mb-2 focus:ring-2 focus:ring-blue-500"
+                />
+                <input
+                  type="text"
+                  placeholder="CVV"
+                  className="w-full p-2 border rounded mb-2 focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
               <button 
-                className="w-full py-2 bg-primary text-white rounded"
+                className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors duration-200"
                 onClick={handlePaymentSuccess}
-                disabled={loading || !canProceed}
+                disabled={loading}
               >
                 {loading ? 'Processing...' : 'Pay with Card'}
               </button>
             </div>
           </div>
-
-          {/* Proceed Button */}
-          <button
-            onClick={handlePaymentSuccess}
-            disabled={loading || !canProceed}
-            className={`w-full py-3 mt-4 rounded-lg bg-primary text-white hover:bg-red-700 ${
-              (loading || !canProceed) ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-          >
-            {loading ? 'Processing Payment...' : 'Proceed to Payment'}
-          </button>
         </div>
       </div>
 
       {/* Payment Success Popup */}
       {showPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-            <h2 className="text-2xl font-bold text-green-600">
-              Booking Successfull!
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-md">
+            <h2 className="text-2xl font-bold text-green-600 mb-4">
+              Booking Successful!
             </h2>
-            <p className="mt-4">
-              Your payment has been processed successfully. A confirmation email has been sent to {userData?.email} with your booking details and ticket.
+            <p className="text-gray-700">
+              Your payment has been processed successfully. A confirmation email has been sent to {userInfo.email} with your booking details and ticket.
             </p>
             <button
               onClick={handleClosePopup}
-              className="mt-6 py-2 px-4 bg-primary text-white rounded hover:bg-red-700"
+              className="mt-6 py-2 px-6 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors duration-200"
             >
               Close
             </button>

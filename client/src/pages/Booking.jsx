@@ -20,11 +20,17 @@ function Booking() {
 
   const validationSchema = z.object({
     name: z.string().min(1, 'Name is required'),
-    email: z.string().email('Invalid email format').regex(/\@gmail\.com$/, 'Email must end with .gmail.com'),
+    email: z.string().email('Invalid email format'),
     phone: z.string().regex(/^\d{10}$/, 'Phone number must be 10 digits'),
     age: z.preprocess((val) => Number(val), z.number().max(99, 'Age must be less than 100')),
     gender: z.enum(['male', 'female', 'other']),
   });
+
+  useEffect(() => {
+    if (!selectedSeats || !bus) {
+      navigate('/');
+    }
+  }, [selectedSeats, bus, navigate]);
 
   useEffect(() => {
     try {
@@ -55,8 +61,11 @@ function Booking() {
     if (isFormValid) {
       const seatNumbers = selectedSeats.map((seatId) => {
         const seat = bus.segments[0].seats.find((s) => s._id === seatId);
-        return parseInt(seat?.number.replace(/[^0-9]/g, ''), 10);
+        return seat?.number;
       });
+
+      // Store user data in localStorage for persistence
+      localStorage.setItem('bookingUserData', JSON.stringify(formData));
 
       navigate('/payment', {
         state: {
@@ -75,7 +84,7 @@ function Booking() {
       <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6">
         <h2 className="text-2xl font-bold mb-6">Passenger Details</h2>
 
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
           <div>
             <label className="block text-gray-700 mb-2">Full Name</label>
             <input
@@ -83,10 +92,10 @@ function Booking() {
               name="name"
               value={formData.name}
               onChange={handleInputChange}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
               required
             />
-            {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
           </div>
 
           <div>
@@ -96,10 +105,10 @@ function Booking() {
               name="email"
               value={formData.email}
               onChange={handleInputChange}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
               required
             />
-            {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
           </div>
 
           <div>
@@ -109,10 +118,10 @@ function Booking() {
               name="phone"
               value={formData.phone}
               onChange={handleInputChange}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
               required
             />
-            {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
+            {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -123,10 +132,10 @@ function Booking() {
                 name="age"
                 value={formData.age}
                 onChange={handleInputChange}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                 required
               />
-              {errors.age && <p className="text-red-500 text-sm">{errors.age}</p>}
+              {errors.age && <p className="text-red-500 text-sm mt-1">{errors.age}</p>}
             </div>
 
             <div>
@@ -135,7 +144,7 @@ function Booking() {
                 name="gender"
                 value={formData.gender}
                 onChange={handleInputChange}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                 required
               >
                 <option value="male">Male</option>
@@ -162,12 +171,12 @@ function Booking() {
           </div>
 
           <button
-            type="button"
+            type="submit"
             onClick={handlePayment}
             disabled={!isFormValid}
-            className={`w-full py-3 rounded-lg font-bold ${
+            className={`w-full py-3 rounded-lg font-bold transition-colors duration-200 ${
               isFormValid
-                ? 'bg-primary text-white hover:bg-red-700'
+                ? 'bg-blue-600 text-white hover:bg-blue-700'
                 : 'bg-gray-400 text-gray-700 cursor-not-allowed'
             }`}
           >

@@ -18,7 +18,7 @@ function useBusDetails() {
           `http://localhost:3000/api/buses/getBuses/?id=${busId}`,
           {
             headers: {
-              Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3N2MwNjA5YTIzOTk5Mzc2YzAwNzZlMSIsImVtYWlsIjoibkBnbWFpbC5jb20iLCJuYW1lIjoibmlzaGFudGgiLCJpYXQiOjE3Mzc1MjUxNDMsImV4cCI6MTczNzYwNDM0M30.CZ4fpeEPs2E9Cq0L29U5yVXHmXLmD9Ng7nhyo9hGjP8`,
+              Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3N2MwNjA5YTIzOTk5Mzc2YzAwNzZlMSIsImVtYWlsIjoibkBnbWFpbC5jb20iLCJuYW1lIjoibmlzaGFudGgiLCJpYXQiOjE3Mzc1Mjc1NTAsImV4cCI6MTczNzYwNjc1MH0.8cCMr5WhCZxf5RK0JgXI1kBBp6Ej617PJ0GNzqjZMHc`,
             },
           }
         );
