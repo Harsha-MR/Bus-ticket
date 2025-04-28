@@ -47,9 +47,11 @@ function Register() {
           password: formData.password,
         });
         console.log('Login successful:', response.data);
-
+        
         // Store the user's full name in local storage
-        localStorage.setItem('userName', formData.name);
+        localStorage.setItem('userName', response.data.user.name);
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('userId', response.data.user.id);
 
         // Show success message
         setSuccessMessage('Login successful! Redirecting to homepage...');
@@ -57,7 +59,7 @@ function Register() {
 
         // Wait for 2 seconds, then redirect to the homepage
         setTimeout(() => {
-          navigate('/');
+          navigate('/', { state: { userName: formData.name } }); // Pass userName to Home
         }, 2000);
       } catch (error) {
         setError(error.response?.data?.message || 'Login failed. Please check your credentials.');

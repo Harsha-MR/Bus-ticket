@@ -36,13 +36,13 @@ export const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendTicketEmail = async (userEmail, emailSubject, emailText, emailHtml, filePath,b_id) => {
+export const sendTicketEmail = async (email, emailSubject, emailText, emailHtml, filePath,b_id) => {
 
   try {
     // Use the req.user.email for the recipient's address
     await transporter.sendMail({
       from: process.env.EMAIL_USER, // Use environment variable directly
-      to: userEmail, 
+      to: email, // Recipient's email address
       subject: emailSubject,
       text: emailText,
       html:emailHtml,

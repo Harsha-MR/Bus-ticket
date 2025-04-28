@@ -27,7 +27,7 @@ export const getBookingHistory = async (req, res) => {
 
 export const bookSeats = async (req, res) => {
   try {
-    const { busId, from, to, seats } = req.body;
+    const { busId, from, to, seats, email } = req.body;
     const userId = req.user.id;
     const userEmail = req.user.email;
     const userName = req.user.name;
@@ -82,7 +82,8 @@ export const bookSeats = async (req, res) => {
       const segment = bus.segments.find(
         (seg) => seg.from === bus.route[i] && seg.to === bus.route[i + 1]
       );
-
+      console.log(segment);
+      
       segment.seats.forEach((seat) => {
         if (seats.includes(seat.number)) {
           seat.isBooked = true;
@@ -140,11 +141,11 @@ export const bookSeats = async (req, res) => {
       <p>Please find your ticket attached as a PDF.</p>
     `;
     const b_id=booking._id;
-    await sendTicketEmail(userEmail, emailSubject, emailText, emailHtml, filePath,b_id);
+    await sendTicketEmail(email, emailSubject, emailText, emailHtml, filePath,b_id);
 
     // Send response to client
     res.status(200).json({
-      message: `Seats booked successfully. Confirmation email sent to ${userEmail}.`,
+      message: `Seats booked successfully. Confirmation email sent to ${email}.`,
       bookedSeats: seats,
       from,
       to,

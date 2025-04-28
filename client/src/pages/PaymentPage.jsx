@@ -283,14 +283,14 @@ function Payment() {
         email: userData.email, // Include user's email from the booking form
         name: userData.name // Include user's name from the booking form
       };
-
+      var token = localStorage.getItem('token');
       const response = await axios.post(
         `http://localhost:3000/api/bookings/${bus._id}/book-seats`,
         payload,
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3OGYzMDdkZTJlNzdlNjVjNzNkZTczZSIsImVtYWlsIjoiaGFyc2hha3VtYXJtcjg4QGdtYWlsLmNvbSIsIm5hbWUiOiJoYXJzaGEiLCJpYXQiOjE3Mzc1NjA1NDAsImV4cCI6MTczNzYzOTc0MH0.lXj1D1X6hHVXvfHHu31CfpjrI9hwOU6wTMiw0SVc13s` // Get token from localStorage
+            'Authorization': `Bearer ${token}` // Get token from localStorage
           }
         }
       );
