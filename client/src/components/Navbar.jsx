@@ -22,12 +22,12 @@ function Navbar() {
   }, [location.state]); // Trigger whenever navigation state changes
 
   const handleLoginClick = () => {
-    // Simulate login by setting a user name in localStorage
-    const simulatedUserName = "John Doe"; // Replace with actual login logic
-    localStorage.setItem('userName', simulatedUserName);
+    // // Simulate login by setting a user name in localStorage
+    // const simulatedUserName = ""; // Replace with actual login logic
+    // localStorage.setItem('userName', simulatedUserName);
 
     // Extract the first name and update the state
-    const firstName = simulatedUserName.split(' ')[0];
+    //const firstName = simulatedUserName.split(' ')[0];
     setUserName(firstName); // Dynamically update the state
 
     // Navigate to the register page or dashboard

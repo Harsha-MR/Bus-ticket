@@ -1,30 +1,81 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Clock, MapPin } from 'lucide-react';
+import axios from 'axios';
 
-const ViewSeats = () => {
+const ViewSeats = ({ busId }) => {
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [selectedPrice, setSelectedPrice] = useState('ALL');
+  const [seatData, setSeatData] = useState({ lowerDeck: [], upperDeck: [] });
+  const [loading, setLoading] = useState(true);
 
-  const prices = ['ALL', '600', '700'];
+  useEffect(() => {
+    const fetchSeatAvailability = async () => {
+      try {
+        const response = await axios.get(`/api/bookings/seat-availability/${busId}`);
+        const { segments } = response.data;
+        
+        // Process seat data
+        const processedSeats = segments.map(segment => ({
+          ...segment,
+          seats: segment.seats.map(seat => ({
+            ...seat,
+            isAvailable: !seat.isBooked
+          }))
+        }));
 
-  const generateSeats = (start, count) => {
-    return Array.from({ length: count }, (_, index) => ({
-      id: start + index,
-      number: start + index,
-      isAvailable: Math.random() > 0.3,
-      gender: Math.random() > 0.5 ? 'male' : 'female',
-      price: Math.random() > 0.5 ? 600 : 700
-    }));
-  };
+        // Split into lower and upper deck
+        setSeatData({
+          lowerDeck: processedSeats.filter(seat => seat.number <= 18),
+          upperDeck: processedSeats.filter(seat => seat.number > 18)
+        });
+        
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching seat availability:', error);
+        setLoading(false);
+      }
+    };
 
-  const lowerDeckSeats = generateSeats(1, 18);
-  const upperDeckSeats = generateSeats(19, 18);
+    fetchSeatAvailability();
+  }, [busId]);
 
-  const handleSeatClick = (seatId) => {
-    if (selectedSeats.includes(seatId)) {
-      setSelectedSeats(selectedSeats.filter(id => id !== seatId));
-    } else {
-      setSelectedSeats([...selectedSeats, seatId]);
+  const handleSeatClick = async (seat) => {
+    if (!seat.isAvailable) return;
+    
+    try {
+      // Make API call to book the seat
+      const response = await axios.post('/api/bookings/book-seat', {
+        busId,
+        seatNumber: seat.number
+      });
+
+      if (response.data.success) {
+        // Update local state to reflect the booking
+        setSeatData(prevData => ({
+          lowerDeck: prevData.lowerDeck.map(s => 
+            s.number === seat.number ? { ...s, isAvailable: false } : s
+          ),
+          upperDeck: prevData.upperDeck.map(s => 
+            s.number === seat.number ? { ...s, isAvailable: false } : s
+          )
+        }));
+
+        // Add booking to local storage history
+        const existingHistory = JSON.parse(localStorage.getItem('bookingHistory') || '[]');
+        const newBooking = {
+          id: response.data.bookingId,
+          seatNumber: seat.number,
+          busId,
+          date: new Date().toISOString(),
+          status: 'confirmed'
+        };
+        localStorage.setItem('bookingHistory', JSON.stringify([...existingHistory, newBooking]));
+
+        setSelectedSeats([...selectedSeats, seat.number]);
+      }
+    } catch (error) {
+      console.error('Error booking seat:', error);
+      alert('Failed to book seat. Please try again.');
     }
   };
 
@@ -33,12 +84,12 @@ const ViewSeats = () => {
       <h3 className="text-gray-600 mb-4">{deckTitle}</h3>
       <div className="grid grid-cols-6 gap-2 bg-white p-4 rounded-lg border">
         {seats.map((seat) => {
-          const isSelected = selectedSeats.includes(seat.id);
+          const isSelected = selectedSeats.includes(seat.number);
           const showSeat = selectedPrice === 'ALL' || seat.price.toString() === selectedPrice;
 
           return (
             <div
-              key={seat.id}
+              key={seat.number}
               className={`
                 ${!showSeat ? 'hidden' : ''}
                 ${seat.isAvailable 
@@ -50,7 +101,7 @@ const ViewSeats = () => {
                 ${!isSelected && seat.gender === 'male' ? 'bg-blue-50' : ''}
                 border rounded p-2 text-center text-sm transition-colors
               `}
-              onClick={() => seat.isAvailable && handleSeatClick(seat.id)}
+              onClick={() => handleSeatClick(seat)}
             >
               {seat.number}
             </div>
@@ -59,6 +110,10 @@ const ViewSeats = () => {
       </div>
     </div>
   );
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -134,8 +189,8 @@ const ViewSeats = () => {
 
       {/* Seat Layout */}
       <div className="bg-white p-6 rounded-lg shadow-sm">
-        <SeatLayout seats={lowerDeckSeats} deckTitle="Lower Deck" />
-        <SeatLayout seats={upperDeckSeats} deckTitle="Upper Deck" />
+        <SeatLayout seats={seatData.lowerDeck} deckTitle="Lower Deck" />
+        <SeatLayout seats={seatData.upperDeck} deckTitle="Upper Deck" />
       </div>
     </div>
   );
